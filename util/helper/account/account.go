@@ -1,0 +1,77 @@
+package account
+
+import (
+	"fmt"
+	"time"
+	"github.com/kaifei-bianjie/mock/types"
+	"github.com/kaifei-bianjie/mock/util/contants"
+	"encoding/json"
+	"bytes"
+	"github.com/kaifei-bianjie/mock/util/helper"
+)
+
+func GenKeyName(namePrefix string, num int) string {
+	return fmt.Sprintf("%s_%v_%v", namePrefix, time.Now().Unix(), num)
+}
+
+// create key
+func CreateAccount(name, password, seed string) (string, error) {
+	req := types.KeyCreateReq{
+		Name:     name,
+		Password: password,
+		Seed: seed,
+	}
+
+	uri := contants.UriKeyCreate
+
+	reqBytes, err := json.Marshal(req)
+	if err != nil {
+		return "", err
+	}
+
+	reqBody := bytes.NewBuffer(reqBytes)
+
+	statusCode, resBytes, err := helper.HttpClientPostJsonData(uri, reqBody)
+
+	if err != nil {
+		return "", err
+	}
+
+	if statusCode == contants.StatusCodeOk {
+		res := types.KeyCreateRes{}
+		if err := json.Unmarshal(resBytes, &res); err != nil {
+			return "", nil
+		}
+		return res.Address, nil
+	} else if statusCode == contants.StatusCodeConflict {
+		return "", fmt.Errorf("%v", string(resBytes))
+	} else {
+		errRes := types.ErrorRes{}
+		if err := json.Unmarshal(resBytes, &errRes); err != nil {
+			return "", err
+		}
+		return "", fmt.Errorf("err code: %v, err msg: %v", errRes.Code, errRes.ErrorMessage)
+	}
+}
+
+// get account info
+func GetAccountInfo(address string) (types.AccountInfoRes, error) {
+	var (
+		accountInfo types.AccountInfoRes
+	)
+	uri := fmt.Sprintf(contants.UriAccountInfo, address)
+	statusCode, resByte, err := helper.HttpClientGetData(uri)
+
+	if err != nil {
+		return accountInfo, err
+	}
+
+	if statusCode == contants.StatusCodeOk {
+		if err := json.Unmarshal(resByte, &accountInfo); err != nil {
+			return accountInfo, err
+		}
+		return accountInfo, nil
+	} else {
+		return accountInfo, fmt.Errorf("status code is not ok, code: %v", statusCode)
+	}
+}
