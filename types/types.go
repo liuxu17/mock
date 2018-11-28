@@ -60,6 +60,11 @@ type SignTxReq struct {
 	AppendSig     bool       `json:"append_sig"`
 }
 
-type BoradcaseTxReq struct {
+type PostTxReq struct {
 	Tx auth.StdTx `json:"tx"`
-} 
+}
+
+type GenSignedTxDataRes struct {
+	ResBytes []byte
+	ChanNum  int
+}

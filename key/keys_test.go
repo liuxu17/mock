@@ -16,7 +16,7 @@ func TestCreateAccounts(t *testing.T) {
 		{
 			name: "test create accounts",
 			args: args{
-				num: 1,
+				num: 10,
 			},
 		},
 	}

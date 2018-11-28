@@ -33,7 +33,7 @@ func TestSendTransferTx(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			res, err := SendTransferTx(tt.args.senderInfo, tt.args.receiver, tt.args.generateOnly);
+			res, err := SendTransferTx(tt.args.senderInfo, tt.args.receiver, "", tt.args.generateOnly);
 			if  err != nil {
 				t.Fatal(err)
 			}

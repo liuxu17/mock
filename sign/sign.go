@@ -36,7 +36,11 @@ var (
 
 //custom tx codec
 func init() {
-	InitBech32()
+	config := sdk.GetConfig()
+	config.SetBech32PrefixForAccount(Bech32PrefixAccAddr, Bech32PrefixAccPub)
+	config.SetBech32PrefixForValidator(Bech32PrefixValAddr, Bech32PrefixValPub)
+	config.SetBech32PrefixForConsensusNode(Bech32PrefixConsAddr, Bech32PrefixConsPub)
+	config.Seal()
 
 	var cdc = codec.New()
 	bank.RegisterCodec(cdc)
@@ -44,14 +48,6 @@ func init() {
 	sdk.RegisterCodec(cdc)
 	codec.RegisterCrypto(cdc)
 	Cdc = cdc
-}
-
-func InitBech32() {
-	config := sdk.GetConfig()
-	config.SetBech32PrefixForAccount(Bech32PrefixAccAddr, Bech32PrefixAccPub)
-	config.SetBech32PrefixForValidator(Bech32PrefixValAddr, Bech32PrefixValPub)
-	config.SetBech32PrefixForConsensusNode(Bech32PrefixConsAddr, Bech32PrefixConsPub)
-	config.Seal()
 }
 
 // sign tx
@@ -96,57 +92,74 @@ func signTx(unsignedTx auth.StdTx, senderInfo types.AccountInfo) ([]byte, error)
 }
 
 // broadcast signed tx
-func BroadcastSignedTx(senderInfo types.AccountInfo, receiver string) ([]byte, error) {
+func GenSignedTxData(senderInfo types.AccountInfo, receiver string, resChan chan types.GenSignedTxDataRes, chanNum int) {
 	var (
 		unsignedTx, signedTx auth.StdTx
+		method = "GenSignedTxData"
 	)
+	log.Printf("%v: %v goroutine begin gen signed data\n", method, chanNum)
+
+	signedTxDataRes := types.GenSignedTxDataRes {
+		ChanNum: chanNum,
+	}
 
 	// build unsigned tx
-	unsignedTxBytes, err := tx.SendTransferTx(senderInfo, receiver, true)
+	unsignedTxBytes, err := tx.SendTransferTx(senderInfo, receiver, "0.1iris", true)
 	if err != nil {
-		log.Printf("build unsigned tx failed: %v\n", err)
-		return nil, err
+		log.Printf("%v: build unsigned tx failed: %v\n", method, err)
+		resChan <- signedTxDataRes
 	}
 	err = Cdc.UnmarshalJSON(unsignedTxBytes, &unsignedTx)
 	if err != nil {
-		log.Printf("build unsigned tx failed: %v\n", err)
-		return nil, err
+		log.Printf("%v: build unsigned tx failed: %v\n", method, err)
+		resChan <- signedTxDataRes
 	}
+	//log.Printf("%v: %v goroutine build unsigned tx success\n", method, chanNum)
 
 	// sign tx
 	signedTxBytes, err := signTx(unsignedTx, senderInfo)
 	if err != nil {
-		log.Printf("sign tx failed: %v\n", err)
-		return nil, err
+		log.Printf("%v: sign tx failed: %v\n", method, err)
+		resChan <- signedTxDataRes
 	}
 	err = Cdc.UnmarshalJSON(signedTxBytes, &signedTx)
 	if err != nil {
-		log.Printf("sign tx failed: %v\n", err)
-		return nil, err
+		log.Printf("%v: sign tx failed: %v\n", method, err)
+		resChan <- signedTxDataRes
 	}
+	//log.Printf("%v: %v goroutine sign tx success\n", method, chanNum)
 
-	// broadcast signed tx
-	broadcastTxReq := types.BoradcaseTxReq{
+	// build signed tx data
+	broadcastTxReq := types.PostTxReq{
 		Tx: signedTx,
 	}
 	reqBytes, err := Cdc.MarshalJSON(broadcastTxReq)
 	if err != nil {
-		log.Printf("broadcast tx failed: %v\n", err)
-		return nil, err
+		log.Printf("%v: cdc marshal json fail: %v\n", method, err)
+		resChan <- signedTxDataRes
 	}
-	reqBuffer := bytes.NewBuffer(reqBytes)
+	//log.Printf("%v: %v goroutine build post tx req success\n", method, chanNum)
 
-	statusCode, resBytes, err := helper.HttpClientPostJsonData(constants.UriTxBroadcastTx, reqBuffer)
+	signedTxDataRes.ResBytes = reqBytes
+	resChan <- signedTxDataRes
 
-	if err != nil {
-		log.Printf("broadcast tx failed: %v\n", err)
-		return nil, err
-	}
-
-	if statusCode != constants.StatusCodeOk {
-		log.Printf("broadcast tx failed, unexcepted status code: %v\n", err)
-		return nil, err
-	}
-
-	return resBytes, nil
+	//if err != nil {
+	//	log.Printf("broadcast tx failed: %v\n", err)
+	//	return nil, err
+	//}
+	//reqBuffer := bytes.NewBuffer(reqBytes)
+	//
+	//statusCode, resBytes, err := helper.HttpClientPostJsonData(constants.UriTxBroadcastTx, reqBuffer)
+	//
+	//if err != nil {
+	//	log.Printf("broadcast tx failed: %v\n", err)
+	//	return nil, err
+	//}
+	//
+	//if statusCode != constants.StatusCodeOk {
+	//	log.Printf("broadcast tx failed, unexcepted status code: %v\n", statusCode)
+	//	return nil, err
+	//}
+	//
+	//return resBytes, nil
 }

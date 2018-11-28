@@ -8,17 +8,22 @@ import (
 	"bytes"
 	"github.com/kaifei-bianjie/mock/util/helper"
 	"github.com/kaifei-bianjie/mock/util/constants"
+	"log"
 )
 
 // send tokens from mockFaucet account to given address
-func SendTransferTx(senderInfo types.AccountInfo, receiver string, generateOnly bool) ([]byte, error) {
+func SendTransferTx(senderInfo types.AccountInfo, receiver string, amount string, generateOnly bool) ([]byte, error) {
 	uri := fmt.Sprintf(constants.UriTransfer, receiver)
 	if generateOnly {
 		uri = uri + "?generate-only=true"
 	}
 
+	if amount == "" {
+		amount = constants.MockTransferAmount
+	}
+
 	req := types.TransferTxReq{
-		Amount: constants.MockTransferAmount,
+		Amount: amount,
 		Sender: senderInfo.Address,
 		BaseTx: types.BaseTx{
 			LocalAccountName: senderInfo.LocalAccountName,
@@ -47,6 +52,7 @@ func SendTransferTx(senderInfo types.AccountInfo, receiver string, generateOnly 
 	if statusCode == constants.StatusCodeOk {
 		return resBytes, nil
 	} else {
+		log.Printf("transfer token fail: %v\n", string(resBytes))
 		errRes := types.ErrorRes{}
 		if err := json.Unmarshal(resBytes, &errRes); err != nil {
 			return nil, err

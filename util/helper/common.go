@@ -48,3 +48,7 @@ func HttpClientGetData(uri string) (int, []byte, error) {
 func ConvertStrToInt64(s string) (int64, error)  {
 	return strconv.ParseInt(s, 10, 64)
 }
+
+func ConvertStrToInt(s string) (int, error)  {
+	return strconv.Atoi(s)
+}

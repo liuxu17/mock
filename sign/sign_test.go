@@ -24,7 +24,7 @@ func TestBroadcastSignedTx(t *testing.T) {
 					LocalAccountName: constants.MockFaucetName,
 					Password:         constants.MockFaucetPassword,
 					AccountNumber:    "0",
-					Sequence:         "2",
+					Sequence:         "3",
 					Address:          conf.MockFaucetAddress,
 				},
 				receiver: "faa1z75mnqnzkr72ehmqh2zcx38fmn52af8sk6rwx5",
@@ -33,7 +33,7 @@ func TestBroadcastSignedTx(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			res, err := BroadcastSignedTx(tt.args.senderInfo, tt.args.receiver)
+			res, err := GenSignedTxData(tt.args.senderInfo, tt.args.receiver)
 			if err != nil {
 
 			}

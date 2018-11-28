@@ -12,7 +12,7 @@ const (
 	UriAccountInfo = "/auth/accounts/%v"           // format is /auth/accounts/{address}
 	UriTransfer    = "/bank/accounts/%s/transfers" // format is /bank/accounts/{address}/transfers
 	UriTxSign      = "/tx/sign"
-	UriTxBroadcastTx = "/tx/broadcast"
+	UriTxBroadcastTx = "/txs/send"
 
 	// http status code
 	StatusCodeOk       = 200
@@ -21,7 +21,7 @@ const (
 	//
 	MockFaucetName     = "mock-faucet"
 	MockFaucetPassword = "1234567890"
-	MockTransferAmount = "0.2iris"
+	MockTransferAmount = "0.3iris"
 	MockDefaultGas     = "200000"
-	MockDefaultFee     = "1iris"
+	MockDefaultFee     = "0.1iris"
 )
