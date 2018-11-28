@@ -4,30 +4,9 @@ import (
 	"testing"
 
 			"encoding/json"
-	"github.com/kaifei-bianjie/mock/util/contants"
-	"math/rand"
+	"github.com/kaifei-bianjie/mock/util/constants"
+		"math/rand"
 )
-
-func TestGenKeyName(t *testing.T) {
-	type args struct {
-		namePrefix string
-		num        int
-	}
-	tests := []struct {
-		name string
-		args args
-		want string
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := GenKeyName(tt.args.namePrefix, tt.args.num); got != tt.want {
-				t.Errorf("GenKeyName() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
 
 func TestCreateAccount(t *testing.T) {
 	type args struct {
@@ -42,7 +21,7 @@ func TestCreateAccount(t *testing.T) {
 		{
 			name: "test create account",
 			args: args{
-				name:     GenKeyName(contants.KeyNamePrefix, rand.Intn(10)),
+				name:     GenKeyName(constants.KeyNamePrefix, rand.Intn(10)),
 				password: "1234567890",
 				seed:     "",
 			},
@@ -50,9 +29,9 @@ func TestCreateAccount(t *testing.T) {
 		//{
 		//	name: "test recover account",
 		//	args: args{
-		//		name:     "mock-faucet",
-		//		password: "1234567890",
-		//		seed: "nephew pupil few cash liberty sorry stay brand east antenna civil cat area endorse wheel chronic inform diesel next drip style neither salad nominee",
+		//		name:     constants.MockFaucetName,
+		//		password: constants.MockFaucetPassword,
+		//		seed: conf.MockFaucetSeed,
 		//	},
 		//},
 	}

@@ -2,47 +2,42 @@ package sign
 
 import (
 	"testing"
+	"github.com/kaifei-bianjie/mock/types"
 	"github.com/kaifei-bianjie/mock/conf"
-	"github.com/cosmos/cosmos-sdk/types"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-)
+	"github.com/kaifei-bianjie/mock/util/constants"
+		)
 
-func TestGenSignData(t *testing.T) {
+func TestBroadcastSignedTx(t *testing.T) {
+
 	type args struct {
-		m sendBody
+		senderInfo types.AccountInfo
+		receiver   string
 	}
 	tests := []struct {
-		name    string
-		args    args
+		name string
+		args args
 	}{
 		{
-			name: "test get sign data",
+			name: "test broadcast a signed tx",
 			args: args{
-				m: sendBody{
-					LocalAccountName: "mock-faucet",
-					Password: "1234567890",
-					ChainID: conf.MockChainId,
-					AccountNumber: 0,
-					Sequence: 28,
-					Gas: 200000,
-					Receiver: "faa1waty0rrpsww3wrwyxhxu0memtr74ar5pegk0zc",
-					Amount: []types.Coin{
-						{
-							Denom: "iris-atto",
-							Amount: sdk.NewIntWithDecimal(2, 18),
-						},
-					},
+				senderInfo: types.AccountInfo{
+					LocalAccountName: constants.MockFaucetName,
+					Password:         constants.MockFaucetPassword,
+					AccountNumber:    "0",
+					Sequence:         "2",
+					Address:          conf.MockFaucetAddress,
 				},
+				receiver: "faa1z75mnqnzkr72ehmqh2zcx38fmn52af8sk6rwx5",
 			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			res, err := GenSignData(tt.args.m)
+			res, err := BroadcastSignedTx(tt.args.senderInfo, tt.args.receiver)
 			if err != nil {
-				t.Fatal(err)
+
 			}
-			t.Log(res)
+			t.Log(string(res))
 		})
 	}
 }

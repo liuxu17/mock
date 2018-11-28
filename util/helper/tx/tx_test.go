@@ -24,18 +24,20 @@ func TestSendTransferTx(t *testing.T) {
 					Password: "1234567890",
 					AccountNumber: "0",
 					Sequence: "1",
-					Address: "faa1q5nlka2hwqs86e92704tng5u0tpq700mpwx6l2",
+					Address: "faa1jyj90se9mel2smn3vr4u9gzg03acwuy8h44q3m",
 				},
-				receiver: "faa1dxzkswsdvc3r0jky0388shcd329hyrpcryq40w",
+				receiver: "faa1z75mnqnzkr72ehmqh2zcx38fmn52af8sk6rwx5",
 				generateOnly: false,
 			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := SendTransferTx(tt.args.senderInfo, tt.args.receiver, tt.args.generateOnly); err != nil {
+			res, err := SendTransferTx(tt.args.senderInfo, tt.args.receiver, tt.args.generateOnly);
+			if  err != nil {
 				t.Fatal(err)
 			}
+			t.Log(string(res))
 		})
 	}
 }

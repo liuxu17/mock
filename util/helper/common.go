@@ -5,13 +5,14 @@ import (
 	"bytes"
 	"io/ioutil"
 	"github.com/kaifei-bianjie/mock/conf"
-	"github.com/kaifei-bianjie/mock/util/contants"
-					)
+	"github.com/kaifei-bianjie/mock/util/constants"
+	"strconv"
+)
 
 // post json data use http client
 func HttpClientPostJsonData(uri string, requestBody *bytes.Buffer) (int, []byte, error) {
 	url := conf.BlockChainNodeServerUrl + uri
-	res, err := http.Post(url, contants.HeaderContentTypeJson, requestBody)
+	res, err := http.Post(url, constants.HeaderContentTypeJson, requestBody)
 	defer res.Body.Close()
 
 	if err != nil {
@@ -42,4 +43,8 @@ func HttpClientGetData(uri string) (int, []byte, error) {
 	}
 
 	return res.StatusCode, resByte, nil
+}
+
+func ConvertStrToInt64(s string) (int64, error)  {
+	return strconv.ParseInt(s, 10, 64)
 }

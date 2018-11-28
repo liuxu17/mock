@@ -25,15 +25,15 @@
 #   unused-packages = true
 
 
-[[override]]
+[[constraint]]
   name = "github.com/irisnet/irishub"
   source = "https://github.com/irisnet/irishub.git"
-  version = "=v0.7.0-rc0"
+  version = "=v0.7.0"
 
 [[override]]
   name = "github.com/cosmos/cosmos-sdk"
   source = "https://github.com/irisnet/cosmos-sdk.git"
-  version = "=v0.26.0-iris"
+  version = "=v0.26.0-iris0.7.0"
 
 [[override]]
   name = "github.com/tendermint/tendermint"

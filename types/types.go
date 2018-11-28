@@ -1,5 +1,7 @@
 package types
 
+import "github.com/cosmos/cosmos-sdk/x/auth"
+
 type AccountInfo struct {
 	LocalAccountName string `json:"name"`
 	Password         string `json:"password"`
@@ -47,3 +49,17 @@ type KeyCreateReq struct {
 type KeyCreateRes struct {
 	Address string `json:"address"`
 }
+
+type SignTxReq struct {
+	Tx            auth.StdTx `json:"tx"`
+	Name          string     `json:"name"`
+	Password      string     `json:"password"`
+	ChainID       string     `json:"chain_id"`
+	AccountNumber int64      `json:"account_number"`
+	Sequence      int64      `json:"sequence"`
+	AppendSig     bool       `json:"append_sig"`
+}
+
+type BoradcaseTxReq struct {
+	Tx auth.StdTx `json:"tx"`
+} 

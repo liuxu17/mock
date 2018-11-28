@@ -1,4 +1,4 @@
-package contants
+package constants
 
 const (
 	HeaderContentTypeJson = "application/json"
@@ -9,8 +9,10 @@ const (
 
 	// http uri
 	UriKeyCreate   = "/keys"
-	UriAccountInfo = "/auth/accounts/%v" // format is /auth/accounts/{address}
-	UriTransfer    = "/bank/accounts/%s/transfers"     // format is /bank/accounts/{address}/transfers
+	UriAccountInfo = "/auth/accounts/%v"           // format is /auth/accounts/{address}
+	UriTransfer    = "/bank/accounts/%s/transfers" // format is /bank/accounts/{address}/transfers
+	UriTxSign      = "/tx/sign"
+	UriTxBroadcastTx = "/tx/broadcast"
 
 	// http status code
 	StatusCodeOk       = 200

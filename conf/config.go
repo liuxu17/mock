@@ -6,8 +6,6 @@ var (
 	BlockInterval int
 	MockFaucetSeed string
 	MockFaucetAddress string
-	MockFaucetName string
-	MockFaucetPassword string
 )
 
 
@@ -15,8 +13,6 @@ func init()  {
 	BlockChainNodeServerUrl = "http://localhost:1317"
 	MockChainId = "rainbow-dev"
 	BlockInterval = 5
-	MockFaucetSeed = "nephew pupil few cash liberty sorry stay brand east antenna civil cat area endorse wheel chronic inform diesel next drip style neither salad nominee"
-	MockFaucetAddress = "faa1q5nlka2hwqs86e92704tng5u0tpq700mpwx6l2"
-	MockFaucetName = "mock-faucet"
-	MockFaucetPassword = "1234567890"
+	MockFaucetSeed = "recycle light kid spider fire disorder relax end stool hip child leaf wild next veteran start theory pretty salt rich avocado card enact april"
+	MockFaucetAddress = "faa1jyj90se9mel2smn3vr4u9gzg03acwuy8h44q3m"
 }

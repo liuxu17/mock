@@ -20,14 +20,14 @@ func CreateAccounts(num int) ([]types.AccountInfo, error) {
 
 	// TODO: use goroutine do these task
 	for i := 1; i <= num ; i++  {
-		keyName := account.GenKeyName(contants.KeyNamePrefix, i)
+		keyName := account.GenKeyName(constants.KeyNamePrefix, i)
 		accountInfo := types.AccountInfo{
 			LocalAccountName: keyName,
-			Password: contants.KeyPassword,
+			Password:         constants.KeyPassword,
 		}
 
 		// create account
-		address, err := account.CreateAccount(keyName, contants.KeyPassword, "")
+		address, err := account.CreateAccount(keyName, constants.KeyPassword, "")
 		if err != nil {
 			return accountsInfo, err
 		}
