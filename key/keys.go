@@ -28,7 +28,7 @@ func CreateAccounts(num int) ([]types.AccountInfo, error) {
 	faucetInfo := types.AccountInfo{
 		LocalAccountName: constants.MockFaucetName,
 		Password:         constants.MockFaucetPassword,
-		Address:          conf.MockFaucetAddress,
+		Address:          conf.FaucetAddress,
 	}
 	faucetAccount, err := account.GetAccountInfo(faucetInfo.Address)
 	if err != nil {

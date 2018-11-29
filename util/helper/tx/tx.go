@@ -28,7 +28,7 @@ func SendTransferTx(senderInfo types.AccountInfo, receiver string, amount string
 		BaseTx: types.BaseTx{
 			LocalAccountName: senderInfo.LocalAccountName,
 			Password:         senderInfo.Password,
-			ChainID:          conf.MockChainId,
+			ChainID:          conf.ChainId,
 			AccountNumber:    senderInfo.AccountNumber,
 			Sequence:         senderInfo.Sequence,
 			Gas:              constants.MockDefaultGas,

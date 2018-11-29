@@ -65,7 +65,7 @@ func signTx(unsignedTx auth.StdTx, senderInfo types.AccountInfo) ([]byte, error)
 		Tx:            unsignedTx,
 		Name:          senderInfo.LocalAccountName,
 		Password:      senderInfo.Password,
-		ChainID:       conf.MockChainId,
+		ChainID:       conf.ChainId,
 		AccountNumber: accountNumber,
 		Sequence:      sequence,
 		AppendSig:     true,

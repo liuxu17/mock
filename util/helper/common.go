@@ -7,11 +7,13 @@ import (
 	"github.com/kaifei-bianjie/mock/conf"
 	"github.com/kaifei-bianjie/mock/util/constants"
 	"strconv"
+	"os"
+	"bufio"
 )
 
 // post json data use http client
 func HttpClientPostJsonData(uri string, requestBody *bytes.Buffer) (int, []byte, error) {
-	url := conf.BlockChainNodeServerUrl + uri
+	url := conf.NodeUrl + uri
 	res, err := http.Post(url, constants.HeaderContentTypeJson, requestBody)
 	defer res.Body.Close()
 
@@ -30,7 +32,7 @@ func HttpClientPostJsonData(uri string, requestBody *bytes.Buffer) (int, []byte,
 
 // get data use http client
 func HttpClientGetData(uri string) (int, []byte, error) {
-	res, err := http.Get(conf.BlockChainNodeServerUrl + uri)
+	res, err := http.Get(conf.NodeUrl + uri)
 	defer res.Body.Close()
 
 	if err != nil {
@@ -49,6 +51,18 @@ func ConvertStrToInt64(s string) (int64, error)  {
 	return strconv.ParseInt(s, 10, 64)
 }
 
-func ConvertStrToInt(s string) (int, error)  {
-	return strconv.Atoi(s)
+func WriteFile(filePath string, content []byte) error  {
+	file, err := os.OpenFile(filePath, os.O_CREATE|os.O_WRONLY, 0755)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	fileWrite := bufio.NewWriter(file)
+	_, err = fileWrite.Write(content)
+	if err != nil {
+		return err
+	}
+	fileWrite.Flush()
+	return nil
 }

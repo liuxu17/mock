@@ -25,7 +25,7 @@ func TestBroadcastSignedTx(t *testing.T) {
 					Password:         constants.MockFaucetPassword,
 					AccountNumber:    "0",
 					Sequence:         "3",
-					Address:          conf.MockFaucetAddress,
+					Address:          conf.FaucetAddress,
 				},
 				receiver: "faa1z75mnqnzkr72ehmqh2zcx38fmn52af8sk6rwx5",
 			},
