@@ -28,7 +28,7 @@ Example:
 				panic(err)
 			}
 
-			filename := fmt.Sprintf("res_signed_tx_%v.txt", time.Now().Unix())
+			filename := fmt.Sprintf("res_signed_tx_%v", time.Now().Unix())
 			filePath := fmt.Sprintf("%v/%v", outputDir, filename)
 
 			err = helper.WriteFile(filePath, []byte(strings.Join(signedTxData, "\n")))

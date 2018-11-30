@@ -68,3 +68,17 @@ type GenSignedTxDataRes struct {
 	ResBytes []byte
 	ChanNum  int
 }
+
+type PostTx struct {
+	Msgs       []string       `json:"msgs"`
+	Fee        auth.StdFee    `json:"fee"`
+	Signatures []StdSignature `json:"signatures"`
+	Memo       string         `json:"memo"`
+}
+
+type StdSignature struct {
+	PubKey        []byte `json:"pub_key"` // optional
+	Signature     []byte `json:"signature"`
+	AccountNumber int64  `json:"account_number"`
+	Sequence      int64  `json:"sequence"`
+}

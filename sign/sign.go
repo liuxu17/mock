@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"log"
 	"github.com/kaifei-bianjie/mock/util/constants"
+	"encoding/json"
 )
 
 const (
@@ -104,7 +105,7 @@ func GenSignedTxData(senderInfo types.AccountInfo, receiver string, resChan chan
 	}
 
 	// build unsigned tx
-	unsignedTxBytes, err := tx.SendTransferTx(senderInfo, receiver, "0.1iris", true)
+	unsignedTxBytes, err := tx.SendTransferTx(senderInfo, receiver, "0.01iris", true)
 	if err != nil {
 		log.Printf("%v: build unsigned tx failed: %v\n", method, err)
 		resChan <- signedTxDataRes
@@ -114,7 +115,6 @@ func GenSignedTxData(senderInfo types.AccountInfo, receiver string, resChan chan
 		log.Printf("%v: build unsigned tx failed: %v\n", method, err)
 		resChan <- signedTxDataRes
 	}
-	//log.Printf("%v: %v goroutine build unsigned tx success\n", method, chanNum)
 
 	// sign tx
 	signedTxBytes, err := signTx(unsignedTx, senderInfo)
@@ -127,20 +127,44 @@ func GenSignedTxData(senderInfo types.AccountInfo, receiver string, resChan chan
 		log.Printf("%v: sign tx failed: %v\n", method, err)
 		resChan <- signedTxDataRes
 	}
-	//log.Printf("%v: %v goroutine sign tx success\n", method, chanNum)
 
-	// build signed tx data
-	broadcastTxReq := types.PostTxReq{
-		Tx: signedTx,
+	// build signed data
+	msgBytes, err := Cdc.MarshalJSON(signedTx.Msgs[0])
+	if err != nil {
+		log.Printf("%v: build post tx data failed: %v\n", method, err)
+		resChan <- signedTxDataRes
 	}
-	reqBytes, err := Cdc.MarshalJSON(broadcastTxReq)
+
+	signature := signedTx.Signatures[0]
+
+	stdSign := types.StdSignature{
+		PubKey: signature.PubKey.Bytes(),
+		Signature: signature.Signature,
+		AccountNumber: signature.AccountNumber,
+		Sequence: signature.Sequence,
+	}
+
+	postTx := types.PostTx{
+		Msgs: []string{string(msgBytes)},
+		Fee: auth.StdFee{
+			Amount: signedTx.Fee.Amount,
+			Gas: int64(signedTx.Fee.Gas),
+		},
+		Signatures: []types.StdSignature{stdSign},
+		Memo: signedTx.Memo,
+	}
+
+	postTxBytes, err := json.Marshal(postTx)
+	//postTxBytes, err := Cdc.MarshalJSON(postTx)
+
 	if err != nil {
 		log.Printf("%v: cdc marshal json fail: %v\n", method, err)
 		resChan <- signedTxDataRes
 	}
-	//log.Printf("%v: %v goroutine build post tx req success\n", method, chanNum)
+	signedTxDataRes.ResBytes = postTxBytes
 
-	signedTxDataRes.ResBytes = reqBytes
+	log.Println(postTxBytes)
+	log.Println(string(postTxBytes))
 	resChan <- signedTxDataRes
 
 	//if err != nil {

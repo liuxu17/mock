@@ -24,7 +24,7 @@ const (
 	//
 	MockFaucetName     = "mock-faucet"
 	MockFaucetPassword = "1234567890"
-	MockTransferAmount = "0.3iris"
+	MockTransferAmount = "0.03iris"
 	MockDefaultGas     = "200000"
-	MockDefaultFee     = "0.1iris"
+	MockDefaultFee     = "0.01iris"
 )
