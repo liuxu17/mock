@@ -10,25 +10,29 @@
 **Command**
 
 ```bash
-mock faucet-init --seed="recycle light kid spider fire disorder relax end stool hip child leaf wild next veteran start theory pretty salt rich avocado card enact april"
+./mock faucet-init --faucet-name mock-faucet-1 --seed="recycle light kid spider fire disorder relax end stool hip child leaf wild next veteran start theory pretty salt rich avocado card enact april" --chain-id=rainbow-dev --node http://localhost:1317
 ```
 
 **Parameters**
 
+- `faucet-name`：faucet name
 - `seed`：大账户的助记词
+- `chain-id`：chain id
+- `node`：lcd 接口地址
 
 ## Gen signed tx data
 
 **Command**
 
 ```bash
-mock gen-signed-tx --num 20 --receiver faa1t5wlur60xzzcxpgjn0d5y8ge7fsdmp7jejl7am --faucet faa1jyj90se9mel2smn3vr4u9gzg03acwuy8h44q3m --chain-id=rainbow-dev --node http://localhost:1317
+./mock gen-signed-tx --num 20 --receiver faa1t5wlur60xzzcxpgjn0d5y8ge7fsdmp7jejl7am --faucet-name mock-faucet-1 --faucet-addr faa1jyj90se9mel2smn3vr4u9gzg03acwuy8h44q3m --chain-id=rainbow-dev --node http://localhost:1317
 ```
 
 **Parameters**
 
 - `num`：需要生成已签名交易的数量
 - `receiver`：交易接收方 address
-- `faucet`： 大账户地址（faucet address），`faucet-init` 命令输出的结果
+- `faucet-name`：faucet name
+- `faucet-addr`：大账户地址（faucet address），`faucet-init` 命令输出的结果
 - `chain-id`：chain id
 - `node`：lcd 接口地址

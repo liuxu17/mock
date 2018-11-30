@@ -17,7 +17,7 @@ func FaucetInitCmd() *cobra.Command {
 		Long: `init mock faucet account
 Note the account must has many token, so that this account can transfer token to other account.
 Example:
-	mock faucet-init --seed="recycle light kid ..."
+	mock faucet-init --faucet-name {faucet-name} --seed="recycle light kid ..."
 `,
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			seed := viper.GetString(FlagFaucetSeed)
