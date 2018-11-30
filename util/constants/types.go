@@ -1,6 +1,9 @@
 package constants
 
 const (
+	// config file name
+	ConfigFileName = "config.toml"
+
 	HeaderContentTypeJson = "application/json"
 
 	// key password, prefix of key name
@@ -8,10 +11,10 @@ const (
 	KeyPassword   = "1234567890"
 
 	// http uri
-	UriKeyCreate   = "/keys"
-	UriAccountInfo = "/auth/accounts/%v"           // format is /auth/accounts/{address}
-	UriTransfer    = "/bank/accounts/%s/transfers" // format is /bank/accounts/{address}/transfers
-	UriTxSign      = "/tx/sign"
+	UriKeyCreate     = "/keys"
+	UriAccountInfo   = "/auth/accounts/%v"           // format is /auth/accounts/{address}
+	UriTransfer      = "/bank/accounts/%s/transfers" // format is /bank/accounts/{address}/transfers
+	UriTxSign        = "/tx/sign"
 	UriTxBroadcastTx = "/txs/send"
 
 	// http status code

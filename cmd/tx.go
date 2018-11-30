@@ -1,31 +1,37 @@
 package cmd
 
 import (
-	"github.com/spf13/cobra"
-	"github.com/kaifei-bianjie/mock/conf"
-	"github.com/spf13/viper"
-	"github.com/kaifei-bianjie/mock/service"
 	"fmt"
-	"time"
+	"github.com/kaifei-bianjie/mock/service"
 	"github.com/kaifei-bianjie/mock/util/helper"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"strings"
-	"os"
+	"time"
 )
 
-func GenSignedTxDataCmd() *cobra.Command  {
+func GenSignedTxDataCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "gen-signed-tx",
 		Short: "generate signed tx data",
-		Long:  `generate signed tx data`,
+		Long: `generate signed tx data
+Example:
+	mock gen-signed-tx --num {num} --receiver {receiver-address} --faucet {faucet-address} --chain-id {chain-id} --node {node-url}
+`,
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			num := viper.GetInt(FlagNumSignedTx)
 			signedTxData := service.BatchGenSignedTxData(num)
 
-			homeDir := viper.GetString(FlagResSignedTxFileHome)
-			filename := fmt.Sprintf("res_signed_tx_%v.txt", time.Now().Unix())
-			filePath := fmt.Sprintf("%v/%v", homeDir, filename)
+			outputDir := viper.GetString(FlagResOutput)
+			err := helper.CreateFolder(outputDir)
+			if err != nil {
+				panic(err)
+			}
 
-			err := helper.WriteFile(filePath, []byte(strings.Join(signedTxData, "\n")))
+			filename := fmt.Sprintf("res_signed_tx_%v.txt", time.Now().Unix())
+			filePath := fmt.Sprintf("%v/%v", outputDir, filename)
+
+			err = helper.WriteFile(filePath, []byte(strings.Join(signedTxData, "\n")))
 			if err != nil {
 				return err
 			}
@@ -34,13 +40,13 @@ func GenSignedTxDataCmd() *cobra.Command  {
 		},
 	}
 
+	cmd.Flags().AddFlagSet(txFlagSet)
 
-	cmd.LocalFlags().StringP(FlagResSignedTxFileHome, "", os.ExpandEnv("$HOME"), "directory of result file which content signed tx data")
-	cmd.LocalFlags().IntP(FlagNumSignedTx, "", 1, "num of signed tx which need to generated")
-	cmd.LocalFlags().IntVarP(&conf.BlockInterval, FlagBlockInterval, "", 5, "block interval")
-	cmd.LocalFlags().StringVarP(&conf.DefaultReceiverAddr, FlagReceiverAddr, "", "", "receiver address")
-
+	cmd.MarkFlagRequired(FlagNumSignedTx)
 	cmd.MarkFlagRequired(FlagReceiverAddr)
+	cmd.MarkFlagRequired(FlagFaucetAddr)
+	cmd.MarkPersistentFlagRequired(FlagChainId)
+	cmd.MarkPersistentFlagRequired(FlagNodeUrl)
 
 	return cmd
 }
