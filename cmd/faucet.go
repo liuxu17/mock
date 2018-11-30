@@ -21,7 +21,8 @@ Example:
 `,
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			seed := viper.GetString(FlagFaucetSeed)
-			address, err := account.CreateAccount(constants.MockFaucetName, constants.MockFaucetPassword, seed)
+			name := viper.GetString(FlagFaucetName)
+			address, err := account.CreateAccount(name, constants.MockFaucetPassword, seed)
 
 			if err != nil {
 				return err

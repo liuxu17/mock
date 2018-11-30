@@ -31,10 +31,10 @@ func BatchGenSignedTxData(num int) []string {
 	for {
 		res := <-resChan
 		counter ++
-		if res.ResBytes != nil {
+		if res.Res != "" {
 			log.Printf("%v: successed, goroutine %v gen signed tx data. now left %v goroutine\n",
 				method, res.ChanNum, lens-counter)
-			signedTxData = append(signedTxData, string(res.ResBytes))
+			signedTxData = append(signedTxData, res.Res)
 		} else {
 			log.Printf("%v: failed, goroutine %v gen signed tx data. now left %v goroutine\n",
 				method, res.ChanNum, lens-counter)

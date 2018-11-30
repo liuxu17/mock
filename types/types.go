@@ -65,7 +65,7 @@ type PostTxReq struct {
 }
 
 type GenSignedTxDataRes struct {
-	ResBytes []byte
+	Res string
 	ChanNum  int
 }
 

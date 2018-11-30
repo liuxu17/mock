@@ -12,7 +12,8 @@ const (
 	FlagHome    = "home"
 
 	FlagFaucetSeed = "seed"
-	FlagFaucetAddr = "faucet"
+	FlagFaucetName = "faucet-name"
+	FlagFaucetAddr = "faucet-addr"
 
 	FlagBlockInterval = "block-interval"
 	FlagReceiverAddr  = "receiver"
@@ -31,11 +32,13 @@ func init() {
 	rootFlagSet.StringVar(&conf.NodeUrl, FlagNodeUrl, "http://localhost:1317", "lcd url")
 	rootFlagSet.String(FlagHome, conf.DefaultHome, "directory of config file")
 
+	faucetFlagSet.StringVarP(&conf.FaucetName, FlagFaucetName,"", "", "faucet name")
 	faucetFlagSet.StringVarP(&conf.FaucetSeed, FlagFaucetSeed, "", "", "seed")
 
 	txFlagSet.String(FlagResOutput, os.ExpandEnv("$HOME")+"/output", "output directory of result file which content signed tx data")
 	txFlagSet.Int(FlagNumSignedTx, 0, "num of signed tx which need to generated")
 	txFlagSet.IntVar(&conf.BlockInterval, FlagBlockInterval, 5, "block interval")
 	txFlagSet.StringVar(&conf.DefaultReceiverAddr, FlagReceiverAddr, "", "receiver address")
+	txFlagSet.StringVar(&conf.FaucetName, FlagFaucetName, "", "faucet name")
 	txFlagSet.StringVar(&conf.FaucetAddress, FlagFaucetAddr, "", "faucet address")
 }

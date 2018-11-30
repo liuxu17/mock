@@ -14,6 +14,7 @@ import (
 	"log"
 	"github.com/kaifei-bianjie/mock/util/constants"
 	"encoding/json"
+	"encoding/base64"
 )
 
 const (
@@ -155,16 +156,13 @@ func GenSignedTxData(senderInfo types.AccountInfo, receiver string, resChan chan
 	}
 
 	postTxBytes, err := json.Marshal(postTx)
-	//postTxBytes, err := Cdc.MarshalJSON(postTx)
 
 	if err != nil {
 		log.Printf("%v: cdc marshal json fail: %v\n", method, err)
 		resChan <- signedTxDataRes
 	}
-	signedTxDataRes.ResBytes = postTxBytes
+	signedTxDataRes.Res = base64.StdEncoding.EncodeToString(postTxBytes)
 
-	log.Println(postTxBytes)
-	log.Println(string(postTxBytes))
 	resChan <- signedTxDataRes
 
 	//if err != nil {

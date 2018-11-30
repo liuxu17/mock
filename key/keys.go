@@ -26,7 +26,7 @@ func CreateAccounts(num int) ([]types.AccountInfo, error) {
 	// get faucet info
 	// sequence of faucet will increment in loop
 	faucetInfo := types.AccountInfo{
-		LocalAccountName: constants.MockFaucetName,
+		LocalAccountName: conf.FaucetName,
 		Password:         constants.MockFaucetPassword,
 		Address:          conf.FaucetAddress,
 	}

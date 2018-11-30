@@ -16,7 +16,7 @@ func GenSignedTxDataCmd() *cobra.Command {
 		Short: "generate signed tx data",
 		Long: `generate signed tx data
 Example:
-	mock gen-signed-tx --num {num} --receiver {receiver-address} --faucet {faucet-address} --chain-id {chain-id} --node {node-url}
+	mock gen-signed-tx --num {num} --receiver {receiver-address} --faucet-name {faucet-address} --faucet-addr {faucet-addr} --chain-id {chain-id} --node {node-url}
 `,
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			num := viper.GetInt(FlagNumSignedTx)
@@ -44,6 +44,7 @@ Example:
 
 	cmd.MarkFlagRequired(FlagNumSignedTx)
 	cmd.MarkFlagRequired(FlagReceiverAddr)
+	cmd.MarkFlagRequired(FlagFaucetName)
 	cmd.MarkFlagRequired(FlagFaucetAddr)
 	cmd.MarkPersistentFlagRequired(FlagChainId)
 	cmd.MarkPersistentFlagRequired(FlagNodeUrl)
