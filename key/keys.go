@@ -1,15 +1,15 @@
 package key
 
 import (
+	"fmt"
+	"github.com/kaifei-bianjie/mock/conf"
+	"github.com/kaifei-bianjie/mock/types"
 	"github.com/kaifei-bianjie/mock/util/constants"
+	"github.com/kaifei-bianjie/mock/util/helper"
 	"github.com/kaifei-bianjie/mock/util/helper/account"
 	"github.com/kaifei-bianjie/mock/util/helper/tx"
-	"github.com/kaifei-bianjie/mock/types"
-	"github.com/kaifei-bianjie/mock/conf"
-	"time"
 	"log"
-	"github.com/kaifei-bianjie/mock/util/helper"
-	"fmt"
+	"time"
 )
 
 // create account and return account info
@@ -108,10 +108,10 @@ func CreateAccounts(num int) ([]types.AccountInfo, error) {
 		if accInfo.Address != "" {
 			successCreatedAccs = append(successCreatedAccs, accInfo)
 		}
-		counter ++
+		counter++
 		if counter == num {
 			log.Printf("%v: all create key goroutine over\n", method)
-			log.Printf("%v: except create %v accounts, but success create %v accounts",
+			log.Printf("%v: except create %v accounts, successful create %v accounts",
 				method, num, len(successCreatedAccs))
 			break
 		}
@@ -131,7 +131,7 @@ func CreateAccounts(num int) ([]types.AccountInfo, error) {
 
 	// note: can't get account info if not wait 2 block
 	log.Printf("%v: sleep %vs before get account sequence\n",
-		method,conf.BlockInterval*2)
+		method, conf.BlockInterval*2)
 	time.Sleep(time.Second * time.Duration(conf.BlockInterval*2))
 	log.Printf("%v: sleep over\n", method)
 
@@ -146,7 +146,7 @@ func CreateAccounts(num int) ([]types.AccountInfo, error) {
 		if accInfo.AccountNumber != "" {
 			accountsInfo = append(accountsInfo, accInfo)
 		}
-		counter ++
+		counter++
 
 		if counter == len(ownTokenAccs) {
 			break
