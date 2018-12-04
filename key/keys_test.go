@@ -1,8 +1,8 @@
 package key
 
 import (
-	"testing"
 	"encoding/json"
+	"testing"
 )
 
 func TestCreateAccounts(t *testing.T) {
@@ -22,12 +22,12 @@ func TestCreateAccounts(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			res, err := CreateAccounts(tt.args.num)
+			res, err := CreateAccount(tt.args.num)
 			if err != nil {
 				t.Fatal(err)
 			}
 			resBytes, err := json.MarshalIndent(res, "", "")
-			if  err != nil {
+			if err != nil {
 				t.Fatal(err)
 			}
 			t.Log(string(resBytes))

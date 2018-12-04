@@ -13,11 +13,25 @@ var (
 	BlockInterval       int
 	DefaultReceiverAddr string
 
-	DefaultHome = os.ExpandEnv("$HOME") + "/mock"
+	DefaultHome = os.ExpandEnv("$HOME") + "/.mock/config"
 
+	KeyFaucetName    = "faucet_name"
 	KeyFaucetSeed    = "faucet_seed"
 	KeyFaucetAddress = "faucet_address"
 )
+
+type ConfigContent struct {
+	FaucetSeed string      `json:"faucet_seed"`
+	FaucetName string      `json:"faucet_name"`
+	FaucetAddr string      `json:"faucet_addr"`
+	SubFaucets []SubFaucet `json:"sub_faucets"`
+}
+
+type SubFaucet struct {
+	FaucetName     string `json:"faucet_name"`
+	FaucetPassword string `json:"faucet_password"`
+	FaucetAddr     string `json:"faucet_addr"`
+}
 
 //func init() {
 //	NodeUrl = "http://localhost:1317"

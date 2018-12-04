@@ -13,11 +13,11 @@ import (
 )
 
 // create account and return account info
-func CreateAccounts(num int) ([]types.AccountInfo, error) {
+func CreateAccount(num int) ([]types.AccountInfo, error) {
 	var (
 		successCreatedAccs, ownTokenAccs, accountsInfo []types.AccountInfo
 		faucetSequence                                 int64
-		method                                         = "CreateAccouts"
+		method                                         = "CreateAccount"
 	)
 
 	createKeyChan := make(chan types.AccountInfo)
@@ -42,64 +42,10 @@ func CreateAccounts(num int) ([]types.AccountInfo, error) {
 		return nil, err
 	}
 
-	// create account
-	createKey := func(index int, accChan chan types.AccountInfo) {
-		var accountInfo types.AccountInfo
-		keyName := account.GenKeyName(constants.KeyNamePrefix, index)
-
-		// create account
-		address, err := account.CreateAccount(keyName, constants.KeyPassword, "")
-		if err != nil {
-			log.Printf("%v: create key fail: %v\n", method, err)
-			accChan <- accountInfo
-		}
-		log.Printf("%v: account which name is %v create success\n",
-			method, keyName)
-
-		accountInfo.LocalAccountName = keyName
-		accountInfo.Password = constants.KeyPassword
-		accountInfo.Address = address
-
-		accChan <- accountInfo
-	}
-
-	// receive token from faucet
-	receiveToken := func(address string, accInfo types.AccountInfo) (types.AccountInfo, error) {
-		// receive token from faucet
-		// get faucet account info
-		senderInfo := faucetInfo
-		senderInfo.Sequence = fmt.Sprintf("%v", faucetSequence)
-
-		// faucet transfer token
-		_, err = tx.SendTransferTx(senderInfo, address, "", false)
-		if err != nil {
-			log.Printf("%v: faucet transfer token to %v fail: %v\n",
-				method, accInfo.LocalAccountName, err)
-			return accInfo, err
-		}
-		faucetSequence += 1
-		log.Printf("%v: faucet transfer token to %v success\n",
-			method, accInfo.LocalAccountName)
-		return accInfo, nil
-	}
-
-	// get account info which created: account_number, sequence
-	getAccountInfo := func(accInfo types.AccountInfo, accInfoChan chan types.AccountInfo) {
-		// get account info
-		acc, err := account.GetAccountInfo(accInfo.Address)
-		if err != nil {
-			log.Printf("%v: get %v info fail: %v\n",
-				method, accInfo.LocalAccountName, err)
-			accInfoChan <- accInfo
-		}
-		accInfo.AccountNumber = acc.AccountNumber
-		accInfo.Sequence = acc.Sequence
-		accInfoChan <- accInfo
-	}
-
 	// use goroutine to create account
 	for i := 1; i <= num; i++ {
-		go createKey(i, createKeyChan)
+		keyName := account.GenKeyName(constants.KeyNamePrefix, i)
+		go CreateKey(keyName, createKeyChan)
 	}
 
 	counter := 0
@@ -122,11 +68,13 @@ func CreateAccounts(num int) ([]types.AccountInfo, error) {
 	// for example, tx which sequence is 35 shouldn't be broadcasted to blockchain
 	// while tx which sequence is 34 hasn't be broadcasted to blockchain
 	for _, acc := range successCreatedAccs {
-		ownTokenAcc, err := receiveToken(acc.Address, acc)
+		faucetInfo.Sequence = fmt.Sprintf("%v", faucetSequence)
+		ownTokenAcc, err := DistributeToken(faucetInfo, acc, "")
 		if err != nil {
 
 		}
 		ownTokenAccs = append(ownTokenAccs, ownTokenAcc)
+		faucetSequence += 1
 	}
 
 	// note: can't get account info if not wait 2 block
@@ -135,9 +83,9 @@ func CreateAccounts(num int) ([]types.AccountInfo, error) {
 	time.Sleep(time.Second * time.Duration(conf.BlockInterval*2))
 	log.Printf("%v: sleep over\n", method)
 
-	// use goroutine to get sequence of account
+	// use goroutine to get accountInfo
 	for _, acc := range ownTokenAccs {
-		go getAccountInfo(acc, accInfoChan)
+		go GetAccountInfo(acc, accInfoChan)
 	}
 
 	counter = 0
@@ -154,4 +102,62 @@ func CreateAccounts(num int) ([]types.AccountInfo, error) {
 	}
 
 	return accountsInfo, nil
+}
+
+// create key and return accountInfo by channel
+func CreateKey(keyName string, accChan chan types.AccountInfo) {
+	var (
+		accountInfo types.AccountInfo
+		method      = "CreateKey"
+	)
+
+	// create account
+	address, err := account.CreateAccount(keyName, constants.KeyPassword, "")
+	if err != nil {
+		log.Printf("%v: create key fail: %v\n", method, err)
+		accChan <- accountInfo
+	}
+	log.Printf("%v: account which name is %v create success\n",
+		method, keyName)
+
+	accountInfo.LocalAccountName = keyName
+	accountInfo.Password = constants.KeyPassword
+	accountInfo.Address = address
+
+	accChan <- accountInfo
+}
+
+// faucet distribute token to account
+func DistributeToken(senderInfo, receiverInfo types.AccountInfo, amount string) (types.AccountInfo, error) {
+	var (
+		method = "DistributeToken"
+	)
+
+	// faucet transfer token
+	_, err := tx.SendTransferTx(senderInfo, receiverInfo.Address, amount, false)
+	if err != nil {
+		log.Printf("%v: faucet transfer token to %v fail: %v\n",
+			method, receiverInfo.LocalAccountName, err)
+		return receiverInfo, err
+	}
+	log.Printf("%v: faucet transfer token to %v success\n",
+		method, receiverInfo.LocalAccountName)
+	return receiverInfo, nil
+}
+
+// get account info, return account info by channel
+func GetAccountInfo(accInfo types.AccountInfo, accInfoChan chan types.AccountInfo) {
+	var (
+		method = "GetAccountInfo"
+	)
+	// get account info
+	acc, err := account.GetAccountInfo(accInfo.Address)
+	if err != nil {
+		log.Printf("%v: get %v info fail: %v\n",
+			method, accInfo.LocalAccountName, err)
+		accInfoChan <- accInfo
+	}
+	accInfo.AccountNumber = acc.AccountNumber
+	accInfo.Sequence = acc.Sequence
+	accInfoChan <- accInfo
 }

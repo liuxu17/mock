@@ -32,8 +32,8 @@ func initFlag(rootCmd *cobra.Command) error {
 		viper.BindPFlags(c.Flags())
 	}
 
-	//homeDir := viper.GetString(cmd.FlagHome)
-	//viper.Set(cmd.FlagHome, homeDir)
+	//homeDir := viper.GetString(cmd.FlagConfDir)
+	//viper.Set(cmd.FlagConfDir, homeDir)
 	//viper.SetConfigName("config")                         // name of config file (without extension)
 	//viper.AddConfigPath(homeDir)                          // search root directory
 	//viper.AddConfigPath(filepath.Join(homeDir, "config")) // search root directory /config

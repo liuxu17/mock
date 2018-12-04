@@ -1,11 +1,11 @@
 package service
 
 import (
-	"log"
-	"github.com/kaifei-bianjie/mock/sign"
 	"github.com/kaifei-bianjie/mock/conf"
-	"github.com/kaifei-bianjie/mock/types"
 	"github.com/kaifei-bianjie/mock/key"
+	"github.com/kaifei-bianjie/mock/sign"
+	"github.com/kaifei-bianjie/mock/types"
+	"log"
 )
 
 func BatchGenSignedTxData(num int) []string {
@@ -15,7 +15,7 @@ func BatchGenSignedTxData(num int) []string {
 	)
 	resChan := make(chan types.GenSignedTxDataRes)
 
-	senderInfos, err := key.CreateAccounts(num)
+	senderInfos, err := key.CreateAccount(num)
 	if err != nil {
 		// TODO: handle err
 	}
@@ -30,7 +30,7 @@ func BatchGenSignedTxData(num int) []string {
 	counter := 0
 	for {
 		res := <-resChan
-		counter ++
+		counter++
 		if res.Res != "" {
 			log.Printf("%v: successed, goroutine %v gen signed tx data. now left %v goroutine\n",
 				method, res.ChanNum, lens-counter)

@@ -1,8 +1,10 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/kaifei-bianjie/mock/conf"
+	"github.com/kaifei-bianjie/mock/key"
 	"github.com/kaifei-bianjie/mock/util/constants"
 	"github.com/kaifei-bianjie/mock/util/helper"
 	"github.com/kaifei-bianjie/mock/util/helper/account"
@@ -20,28 +22,78 @@ Example:
 	mock faucet-init --faucet-name {faucet-name} --seed="recycle light kid ..."
 `,
 		RunE: func(cmd *cobra.Command, _ []string) error {
+			// get flag and validate basic logic
+			var (
+				configContent    conf.ConfigContent
+				configSubFaucets []conf.SubFaucet
+			)
 			seed := viper.GetString(FlagFaucetSeed)
 			name := viper.GetString(FlagFaucetName)
-			address, err := account.CreateAccount(name, constants.MockFaucetPassword, seed)
+			confHomeDir := viper.GetString(FlagConfDir)
+			subFaucetNum := viper.GetInt(FlagSubFaucetAccNum)
+			confFilePath := fmt.Sprintf("%v/%v", confHomeDir, constants.ConfigFileName)
 
+			if subFaucetNum > 10 {
+				return fmt.Errorf("num of sub faucet account shouldn't greater than 10")
+			}
+
+			exists, err := helper.CheckFileExist(confFilePath)
+			if err != nil {
+				panic(err)
+			}
+			if exists {
+				return fmt.Errorf("config file alread exist in %v\n, "+
+					"please remove it before exec this command", confHomeDir)
+			}
+
+			err = helper.CreateFolder(confHomeDir)
+			if err != nil {
+				panic(err)
+			}
+
+			// recover faucet by seed
+			address, err := account.CreateAccount(name, constants.MockFaucetPassword, seed)
 			if err != nil {
 				return err
 			}
 
-			fmt.Printf("faucet address is: %v\n", address)
+			// create sub faucet account
+			subAccs, err := key.CreateFaucetSubAccount(name, constants.MockFaucetPassword, address, subFaucetNum)
+			if err != nil {
+				return err
+			}
 
-			// TODO: can't read default value
-			homeDir := viper.GetString(FlagHome)
-			confFilePath := fmt.Sprintf("%v/%v", homeDir, constants.ConfigFileName)
-			helper.WriteFile(confFilePath, []byte(fmt.Sprintf("%v=%v\n", conf.KeyFaucetSeed, seed)))
-			helper.WriteFile(confFilePath, []byte(fmt.Sprintf("%v=%v\n", conf.KeyFaucetAddress, address)))
+			// write config content to file
+			for _, acc := range subAccs {
+				subFaucet := conf.SubFaucet{
+					FaucetName:     acc.LocalAccountName,
+					FaucetPassword: acc.Password,
+					FaucetAddr:     acc.Address,
+				}
 
+				configSubFaucets = append(configSubFaucets, subFaucet)
+			}
+			configContent.FaucetName = name
+			configContent.FaucetAddr = address
+			configContent.FaucetSeed = seed
+
+			configBytes, err := json.MarshalIndent(configContent, "", "")
+			if err != nil {
+				return err
+			}
+
+			err = helper.WriteFile(confFilePath, configBytes)
+			if err != nil {
+				return err
+			}
+
+			fmt.Printf("success init faucet info in %v\n", confFilePath)
 			return nil
 		},
 	}
 
 	cmd.Flags().AddFlagSet(faucetFlagSet)
-
+	cmd.MarkFlagRequired(FlagFaucetName)
 	cmd.MarkFlagRequired(FlagFaucetSeed)
 
 	return cmd

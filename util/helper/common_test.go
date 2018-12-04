@@ -57,3 +57,29 @@ func TestCreateFolder(t *testing.T) {
 		})
 	}
 }
+
+func TestConvertStrToInt64(t *testing.T) {
+	type args struct {
+		s string
+	}
+	tests := []struct {
+		name string
+		args args
+	}{
+		{
+			name: "test convert str to int64",
+			args: args{
+				s: "149999850.52498939631857518",
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			res, err := ConvertStrToInt64(tt.args.s)
+			if err != nil {
+				t.Fatal(err)
+			}
+			t.Log(res)
+		})
+	}
+}

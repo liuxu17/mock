@@ -27,4 +27,5 @@ const (
 	MockTransferAmount = "0.03iris"
 	MockDefaultGas     = "200000"
 	MockDefaultFee     = "0.01iris"
+	Denom              = "iris"
 )

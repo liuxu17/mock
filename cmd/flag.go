@@ -9,11 +9,12 @@ import (
 const (
 	FlagNodeUrl = "node"
 	FlagChainId = "chain-id"
-	FlagHome    = "home"
+	FlagConfDir = "home"
 
-	FlagFaucetSeed = "seed"
-	FlagFaucetName = "faucet-name"
-	FlagFaucetAddr = "faucet-addr"
+	FlagFaucetSeed      = "seed"
+	FlagFaucetName      = "faucet-name"
+	FlagFaucetAddr      = "faucet-addr"
+	FlagSubFaucetAccNum = "sub-faucet-num"
 
 	FlagBlockInterval = "block-interval"
 	FlagReceiverAddr  = "receiver"
@@ -30,10 +31,12 @@ var (
 func init() {
 	rootFlagSet.StringVar(&conf.ChainId, FlagChainId, "", "chain id")
 	rootFlagSet.StringVar(&conf.NodeUrl, FlagNodeUrl, "http://localhost:1317", "lcd url")
-	rootFlagSet.String(FlagHome, conf.DefaultHome, "directory of config file")
+	rootFlagSet.String(FlagConfDir, conf.DefaultHome, "directory of config file")
 
-	faucetFlagSet.StringVarP(&conf.FaucetName, FlagFaucetName,"", "", "faucet name")
+	faucetFlagSet.StringVarP(&conf.FaucetName, FlagFaucetName, "", "", "faucet name")
 	faucetFlagSet.StringVarP(&conf.FaucetSeed, FlagFaucetSeed, "", "", "seed")
+	faucetFlagSet.String(FlagConfDir, conf.DefaultHome, "directory for save config data")
+	faucetFlagSet.Int(FlagSubFaucetAccNum, 10, "num of sub faucet want to create")
 
 	txFlagSet.String(FlagResOutput, os.ExpandEnv("$HOME")+"/output", "output directory of result file which content signed tx data")
 	txFlagSet.Int(FlagNumSignedTx, 0, "num of signed tx which need to generated")

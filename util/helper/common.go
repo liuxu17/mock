@@ -51,17 +51,27 @@ func ConvertStrToInt64(s string) (int64, error) {
 	return strconv.ParseInt(s, 10, 64)
 }
 
+// check file whether exist
+// return true if exist, otherwise return false
+func CheckFileExist(filePath string) (bool, error) {
+	exists := true
+	if _, err := os.Stat(filePath); err != nil {
+		if os.IsNotExist(err) {
+			exists = false
+		} else {
+			// unknown err
+			return false, err
+		}
+	}
+	return exists, nil
+}
+
 // create folder if not exist
 // return err if not successful create
 func CreateFolder(folderPath string) error {
-	folderExist := true
-	if _, err := os.Stat(folderPath); err != nil {
-		if os.IsNotExist(err) {
-			folderExist = false
-		} else {
-			// unknown err
-			return err
-		}
+	folderExist, err := CheckFileExist(folderPath)
+	if err != nil {
+		return err
 	}
 
 	if !folderExist {
@@ -75,7 +85,7 @@ func CreateFolder(folderPath string) error {
 }
 
 func WriteFile(filePath string, content []byte) error {
-	file, err := os.OpenFile(filePath, os.O_CREATE|os.O_WRONLY, 0755)
+	file, err := os.OpenFile(filePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0755)
 	if err != nil {
 		return err
 	}
