@@ -2,7 +2,9 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/kaifei-bianjie/mock/conf"
 	"github.com/kaifei-bianjie/mock/service"
+	"github.com/kaifei-bianjie/mock/util/constants"
 	"github.com/kaifei-bianjie/mock/util/helper"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -19,18 +21,57 @@ Example:
 	mock gen-signed-tx --num {num} --receiver {receiver-address} --faucet-name {faucet-address} --faucet-addr {faucet-addr} --chain-id {chain-id} --node {node-url}
 `,
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			num := viper.GetInt(FlagNumSignedTx)
-			signedTxData := service.BatchGenSignedTxData(num)
+			var (
+				subFaucets []conf.SubFaucet
+			)
 
+			// create output dir
 			outputDir := viper.GetString(FlagResOutput)
 			err := helper.CreateFolder(outputDir)
 			if err != nil {
-				panic(err)
+				return err
 			}
 
+			// read config from config file
+			// check config file if exists
+			confHome := viper.GetString(FlagConfDir)
+			confFilePath := fmt.Sprintf("%v/%v", confHome, constants.ConfigFileName)
+
+			exists, err := helper.CheckFileExist(confFilePath)
+			if err != nil {
+				return err
+			}
+			if !exists {
+				return fmt.Errorf("can't find config file in %v\n", confFilePath)
+			}
+
+			// read config from config file
+			viper.SetConfigName("config")
+			viper.AddConfigPath(confHome)
+			err = viper.ReadInConfig()
+			if err != nil {
+				return err
+			}
+			err = viper.UnmarshalKey("sub_faucets", &subFaucets)
+			if err != nil {
+				return err
+			}
+			if len(subFaucets) <= 0 {
+				return fmt.Errorf("can't read sub_faucets config")
+			}
+
+			// generate signed tx
+			num := viper.GetInt(FlagNumSignedTx)
+			if num < len(subFaucets) {
+				return fmt.Errorf("%v(num) shouldn't less than %v(num of sub faucet)",
+					num, len(subFaucets))
+			}
+
+			signedTxData := service.BatchGenSignedTxData(num, subFaucets)
+
+			// write result to file
 			filename := fmt.Sprintf("res_signed_tx_%v", time.Now().Unix())
 			filePath := fmt.Sprintf("%v/%v", outputDir, filename)
-
 			err = helper.WriteFile(filePath, []byte(strings.Join(signedTxData, "\n")))
 			if err != nil {
 				return err
@@ -44,8 +85,6 @@ Example:
 
 	cmd.MarkFlagRequired(FlagNumSignedTx)
 	cmd.MarkFlagRequired(FlagReceiverAddr)
-	cmd.MarkFlagRequired(FlagFaucetName)
-	cmd.MarkFlagRequired(FlagFaucetAddr)
 	cmd.MarkPersistentFlagRequired(FlagChainId)
 	cmd.MarkPersistentFlagRequired(FlagNodeUrl)
 

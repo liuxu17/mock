@@ -36,7 +36,7 @@ func CreateFaucetSubAccount(faucetName, faucetPasswd, faucetAddr string, subAccN
 		}
 		counter++
 		if counter == subAccNum {
-			log.Printf("%v: all create key goroutine over\n", method)
+			log.Printf("%v: all create sub faucet key goroutine over\n", method)
 			log.Printf("%v: except create %v accounts, successful create %v accounts",
 				method, subAccNum, len(createdAccs))
 			break

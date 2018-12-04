@@ -1,20 +1,20 @@
 package sign
 
 import (
-	"github.com/kaifei-bianjie/mock/util/helper/tx"
-	"github.com/kaifei-bianjie/mock/types"
+	"bytes"
+	"encoding/base64"
+	"encoding/json"
+	"fmt"
 	"github.com/cosmos/cosmos-sdk/codec"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/kaifei-bianjie/mock/conf"
-	"github.com/kaifei-bianjie/mock/util/helper"
-	"bytes"
-	"fmt"
-	"log"
+	"github.com/kaifei-bianjie/mock/types"
 	"github.com/kaifei-bianjie/mock/util/constants"
-	"encoding/json"
-	"encoding/base64"
+	"github.com/kaifei-bianjie/mock/util/helper"
+	"github.com/kaifei-bianjie/mock/util/helper/tx"
+	"log"
 )
 
 const (
@@ -93,15 +93,15 @@ func signTx(unsignedTx auth.StdTx, senderInfo types.AccountInfo) ([]byte, error)
 	return resBytes, nil
 }
 
-// broadcast signed tx
+// generate signed tx
 func GenSignedTxData(senderInfo types.AccountInfo, receiver string, resChan chan types.GenSignedTxDataRes, chanNum int) {
 	var (
 		unsignedTx, signedTx auth.StdTx
-		method = "GenSignedTxData"
+		method               = "GenSignedTxData"
 	)
 	log.Printf("%v: %v goroutine begin gen signed data\n", method, chanNum)
 
-	signedTxDataRes := types.GenSignedTxDataRes {
+	signedTxDataRes := types.GenSignedTxDataRes{
 		ChanNum: chanNum,
 	}
 
@@ -139,20 +139,20 @@ func GenSignedTxData(senderInfo types.AccountInfo, receiver string, resChan chan
 	signature := signedTx.Signatures[0]
 
 	stdSign := types.StdSignature{
-		PubKey: signature.PubKey.Bytes(),
-		Signature: signature.Signature,
+		PubKey:        signature.PubKey.Bytes(),
+		Signature:     signature.Signature,
 		AccountNumber: signature.AccountNumber,
-		Sequence: signature.Sequence,
+		Sequence:      signature.Sequence,
 	}
 
 	postTx := types.PostTx{
 		Msgs: []string{string(msgBytes)},
 		Fee: auth.StdFee{
 			Amount: signedTx.Fee.Amount,
-			Gas: int64(signedTx.Fee.Gas),
+			Gas:    int64(signedTx.Fee.Gas),
 		},
 		Signatures: []types.StdSignature{stdSign},
-		Memo: signedTx.Memo,
+		Memo:       signedTx.Memo,
 	}
 
 	postTxBytes, err := json.Marshal(postTx)

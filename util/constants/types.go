@@ -2,7 +2,7 @@ package constants
 
 const (
 	// config file name
-	ConfigFileName = "config.toml"
+	ConfigFileName = "config.json"
 
 	HeaderContentTypeJson = "application/json"
 

@@ -1,11 +1,11 @@
 package sign
 
 import (
-	"testing"
-	"github.com/kaifei-bianjie/mock/types"
 	"github.com/kaifei-bianjie/mock/conf"
+	"github.com/kaifei-bianjie/mock/types"
 	"github.com/kaifei-bianjie/mock/util/constants"
 	"log"
+	"testing"
 )
 
 func TestBroadcastSignedTx(t *testing.T) {
@@ -13,8 +13,8 @@ func TestBroadcastSignedTx(t *testing.T) {
 	type args struct {
 		senderInfo types.AccountInfo
 		receiver   string
-		resChan chan types.GenSignedTxDataRes
-		chanNUm int
+		resChan    chan types.GenSignedTxDataRes
+		chanNUm    int
 	}
 
 	resChannel := make(chan types.GenSignedTxDataRes)
@@ -46,7 +46,7 @@ func TestBroadcastSignedTx(t *testing.T) {
 			res := <-tt.args.resChan
 			if res.ChanNum != 0 {
 				t.Logf("%v build signed tx data over\n", res.ChanNum)
-				t.Log(res.ResBytes)
+				t.Log(res.Res)
 			}
 			log.Println(res.ChanNum)
 		})

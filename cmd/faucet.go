@@ -58,6 +58,7 @@ Example:
 			}
 
 			// create sub faucet account
+			fmt.Printf("now create %v sub faucet account\n", subFaucetNum)
 			subAccs, err := key.CreateFaucetSubAccount(name, constants.MockFaucetPassword, address, subFaucetNum)
 			if err != nil {
 				return err
@@ -76,8 +77,9 @@ Example:
 			configContent.FaucetName = name
 			configContent.FaucetAddr = address
 			configContent.FaucetSeed = seed
+			configContent.SubFaucets = configSubFaucets
 
-			configBytes, err := json.MarshalIndent(configContent, "", "")
+			configBytes, err := json.MarshalIndent(configContent, "", "\t")
 			if err != nil {
 				return err
 			}

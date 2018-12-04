@@ -8,6 +8,7 @@ import (
 	"github.com/kaifei-bianjie/mock/util/constants"
 	"github.com/kaifei-bianjie/mock/util/helper/account"
 	"os"
+	"strings"
 )
 
 var (
@@ -23,7 +24,7 @@ func TestMain(m *testing.M) {
 
 	// create faucet account
 	addr, err := account.CreateAccount(faucetName, constants.MockFaucetPassword, conf.FaucetSeed)
-	if err != nil {
+	if err != nil && !strings.Contains(err.Error(), "acount with name") {
 		panic(err)
 	}
 	conf.FaucetAddress = addr
@@ -31,7 +32,6 @@ func TestMain(m *testing.M) {
 	existCode := m.Run()
 
 	os.Exit(existCode)
-
 }
 
 func TestCreateFaucetSubAccount(t *testing.T) {

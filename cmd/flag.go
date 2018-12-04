@@ -38,10 +38,9 @@ func init() {
 	faucetFlagSet.String(FlagConfDir, conf.DefaultHome, "directory for save config data")
 	faucetFlagSet.Int(FlagSubFaucetAccNum, 10, "num of sub faucet want to create")
 
-	txFlagSet.String(FlagResOutput, os.ExpandEnv("$HOME")+"/output", "output directory of result file which content signed tx data")
 	txFlagSet.Int(FlagNumSignedTx, 0, "num of signed tx which need to generated")
-	txFlagSet.IntVar(&conf.BlockInterval, FlagBlockInterval, 5, "block interval")
 	txFlagSet.StringVar(&conf.DefaultReceiverAddr, FlagReceiverAddr, "", "receiver address")
-	txFlagSet.StringVar(&conf.FaucetName, FlagFaucetName, "", "faucet name")
-	txFlagSet.StringVar(&conf.FaucetAddress, FlagFaucetAddr, "", "faucet address")
+	txFlagSet.IntVar(&conf.BlockInterval, FlagBlockInterval, 5, "block interval")
+	txFlagSet.String(FlagResOutput, os.ExpandEnv("$HOME")+"/output", "output directory of result file which content signed tx data")
+	txFlagSet.String(FlagConfDir, conf.DefaultHome, "directory of config file")
 }
