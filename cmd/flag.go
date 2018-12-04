@@ -13,7 +13,6 @@ const (
 
 	FlagFaucetSeed      = "seed"
 	FlagFaucetName      = "faucet-name"
-	FlagFaucetAddr      = "faucet-addr"
 	FlagSubFaucetAccNum = "sub-faucet-num"
 
 	FlagBlockInterval = "block-interval"
@@ -36,7 +35,7 @@ func init() {
 	faucetFlagSet.StringVarP(&conf.FaucetName, FlagFaucetName, "", "", "faucet name")
 	faucetFlagSet.StringVarP(&conf.FaucetSeed, FlagFaucetSeed, "", "", "seed")
 	faucetFlagSet.String(FlagConfDir, conf.DefaultHome, "directory for save config data")
-	faucetFlagSet.Int(FlagSubFaucetAccNum, 10, "num of sub faucet want to create")
+	faucetFlagSet.Int(FlagSubFaucetAccNum, 10, "num of sub faucet want to create, shouldn't greater than 10")
 
 	txFlagSet.Int(FlagNumSignedTx, 0, "num of signed tx which need to generated")
 	txFlagSet.StringVar(&conf.DefaultReceiverAddr, FlagReceiverAddr, "", "receiver address")

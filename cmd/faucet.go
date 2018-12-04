@@ -15,11 +15,11 @@ import (
 func FaucetInitCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "faucet-init",
-		Short: "init mock faucet account",
-		Long: `init mock faucet account
+		Short: "create sub faucet account use faucet account",
+		Long: `create sub faucet account use faucet account
 Note the account must has many token, so that this account can transfer token to other account.
 Example:
-	mock faucet-init --faucet-name {faucet-name} --seed="recycle light kid ..."
+	mock faucet-init --faucet-name {faucet-name} --seed="recycle light kid ..." --sub-faucet-num {sub-faucet-num} --home {config-home} --chain-id {chain-id} --node {node}
 `,
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			// get flag and validate basic logic
