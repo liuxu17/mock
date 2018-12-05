@@ -21,10 +21,10 @@ func BatchGenSignedTxData(num int, subFaucets []conf.SubFaucet) []string {
 	}
 
 	lens := len(senderInfos)
-	log.Printf("%v: now use %v goroutine to gen signed data\n",
-		method, lens)
-
 	if lens > 0 {
+		log.Printf("%v: now use %v goroutine to gen signed data\n",
+			method, lens)
+
 		for i, senderInfo := range senderInfos {
 			go sign.GenSignedTxData(senderInfo, conf.DefaultReceiverAddr, resChan, i)
 		}
@@ -47,6 +47,8 @@ func BatchGenSignedTxData(num int, subFaucets []conf.SubFaucet) []string {
 				break
 			}
 		}
+	} else {
+		log.Printf("%v: no signed tx data\n", method)
 	}
 
 	return signedTxData

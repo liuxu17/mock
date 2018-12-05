@@ -16,9 +16,10 @@ func GenSignedTxDataCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "gen-signed-tx",
 		Short: "generate signed tx data",
-		Long: `generate signed tx data
-Example:
-	mock gen-signed-tx --num {num} --receiver {receiver-address} --home {config-home} --chain-id {chain-id} --node {node-url}
+		Long:  `batch generate signed tx data`,
+		Example: `
+	mock gen-signed-tx --num {num} --receiver {receiver-address} \&
+--home {config-home} --chain-id {chain-id} --node {node-url}
 `,
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			var (
@@ -72,14 +73,17 @@ Example:
 
 			signedTxData := service.BatchGenSignedTxData(num, subFaucets)
 
-			// write result to file
-			filename := fmt.Sprintf("res_signed_tx_%v", time.Now().Unix())
-			filePath := fmt.Sprintf("%v/%v", outputDir, filename)
-			err = helper.WriteFile(filePath, []byte(strings.Join(signedTxData, "\n")))
-			if err != nil {
-				return err
+			if len(signedTxData) > 0 {
+				// write result to file
+				filename := fmt.Sprintf("res_signed_tx_%v", time.Now().Unix())
+				filePath := fmt.Sprintf("%v/%v", outputDir, filename)
+				err = helper.WriteFile(filePath, []byte(strings.Join(signedTxData, "\n")))
+				if err != nil {
+					return err
+				}
+			} else {
+				fmt.Println("no signed tx data")
 			}
-
 			return nil
 		},
 	}
