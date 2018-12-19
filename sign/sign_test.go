@@ -5,8 +5,21 @@ import (
 	"github.com/kaifei-bianjie/mock/types"
 	"github.com/kaifei-bianjie/mock/util/constants"
 	"log"
+	"os"
 	"testing"
 )
+
+func TestMain(m *testing.M) {
+	conf.NodeUrl = "http://localhost:1317"
+	conf.ChainId = "rainbow-dev"
+
+	conf.BlockInterval = 5
+	conf.DefaultReceiverAddr = "faa1r5q5wqwctgfpt3p56qsctptrcq4st6lssyzx65"
+
+	code := m.Run()
+
+	os.Exit(code)
+}
 
 func TestBroadcastSignedTx(t *testing.T) {
 
@@ -24,16 +37,16 @@ func TestBroadcastSignedTx(t *testing.T) {
 		args args
 	}{
 		{
-			name: "test broadcast a signed tx",
+			name: "test gen a signed tx",
 			args: args{
 				senderInfo: types.AccountInfo{
 					LocalAccountName: constants.MockFaucetName,
 					Password:         constants.MockFaucetPassword,
-					AccountNumber:    "0",
-					Sequence:         "169",
-					Address:          conf.FaucetAddress,
+					AccountNumber:    "23",
+					Sequence:         "11",
+					Address:          "faa1mhx2fgwds8uszeazl3au6r0xceppj9xrxavpud",
 				},
-				receiver: "faa1z75mnqnzkr72ehmqh2zcx38fmn52af8sk6rwx5",
+				receiver: conf.DefaultReceiverAddr,
 				chanNUm:  1,
 				resChan:  resChannel,
 			},

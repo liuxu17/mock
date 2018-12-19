@@ -3,10 +3,24 @@ package account
 import (
 	"testing"
 
-			"encoding/json"
+	"encoding/json"
+	"github.com/kaifei-bianjie/mock/conf"
 	"github.com/kaifei-bianjie/mock/util/constants"
-		"math/rand"
+	"os"
 )
+
+func TestMain(m *testing.M) {
+	conf.NodeUrl = "http://localhost:1317"
+	conf.ChainId = "rainbow-dev"
+
+	conf.FaucetSeed = "cube water sing thunder rib buyer assume rebuild cigar earn slight canoe apart grocery image satisfy genre woman mother can client science this tag"
+
+	conf.BlockInterval = 5
+	conf.DefaultReceiverAddr = "faa1r5q5wqwctgfpt3p56qsctptrcq4st6lssyzx65"
+
+	code := m.Run()
+	os.Exit(code)
+}
 
 func TestCreateAccount(t *testing.T) {
 	type args struct {
@@ -18,22 +32,22 @@ func TestCreateAccount(t *testing.T) {
 		name string
 		args args
 	}{
-		{
-			name: "test create account",
-			args: args{
-				name:     GenKeyName(constants.KeyNamePrefix, rand.Intn(10)),
-				password: "1234567890",
-				seed:     "",
-			},
-		},
 		//{
-		//	name: "test recover account",
+		//	name: "test create account",
 		//	args: args{
-		//		name:     constants.MockFaucetName,
-		//		password: constants.MockFaucetPassword,
-		//		seed: conf.MockFaucetSeed,
+		//		name:     GenKeyName(constants.KeyNamePrefix, rand.Intn(10)),
+		//		password: "1234567890",
+		//		seed:     "",
 		//	},
 		//},
+		{
+			name: "test recover account",
+			args: args{
+				name:     constants.MockFaucetName,
+				password: constants.MockFaucetPassword,
+				seed:     conf.FaucetSeed,
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -57,7 +71,7 @@ func TestGetAccountInfo(t *testing.T) {
 		{
 			name: "test get account info",
 			args: args{
-				address: "faa1q5nlka2hwqs86e92704tng5u0tpq700mpwx6l2",
+				address: "faa1r5q5wqwctgfpt3p56qsctptrcq4st6lssyzx65",
 			},
 		},
 	}

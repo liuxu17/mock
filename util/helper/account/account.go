@@ -1,17 +1,18 @@
 package account
 
 import (
-	"fmt"
-	"time"
-	"github.com/kaifei-bianjie/mock/types"
-	"encoding/json"
 	"bytes"
-	"github.com/kaifei-bianjie/mock/util/helper"
+	"encoding/json"
+	"fmt"
+	"github.com/kaifei-bianjie/mock/types"
 	"github.com/kaifei-bianjie/mock/util/constants"
+	"github.com/kaifei-bianjie/mock/util/helper"
+	"github.com/satori/go.uuid"
 )
 
 func GenKeyName(namePrefix string, num int) string {
-	return fmt.Sprintf("%s_%v_%v", namePrefix, time.Now().Unix(), num)
+	uid := uuid.NewV4().String()
+	return fmt.Sprintf("%s_%v_%v", namePrefix, uid, num)
 }
 
 // create key

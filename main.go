@@ -14,18 +14,23 @@ func main() {
 		cmd.GenSignedTxDataCmd(),
 	)
 
-	err := initFlag(rootCmd)
-	if err != nil {
-		panic(err)
-	}
+	executor := prepareMainCmd(rootCmd)
 
-	err = rootCmd.Execute()
+	err := executor.Execute()
 	if err != nil {
 		panic(err)
 	}
 }
 
-func initFlag(rootCmd *cobra.Command) error {
+func prepareMainCmd(cmd *cobra.Command) *cobra.Command {
+	cmd.PersistentPreRunE = func(cmd *cobra.Command, args []string) error {
+		return bindFlagsLoadViper(cmd)
+	}
+
+	return cmd
+}
+
+func bindFlagsLoadViper(rootCmd *cobra.Command) error {
 	// viper bind flag
 	viper.BindPFlags(rootCmd.Flags())
 	for _, c := range rootCmd.Commands() {

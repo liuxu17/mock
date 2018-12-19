@@ -5,10 +5,10 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"github.com/cosmos/cosmos-sdk/codec"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/auth"
-	"github.com/cosmos/cosmos-sdk/x/bank"
+	"github.com/irisnet/irishub/codec"
+	"github.com/irisnet/irishub/modules/auth"
+	"github.com/irisnet/irishub/modules/bank"
+	sdk "github.com/irisnet/irishub/types"
 	"github.com/kaifei-bianjie/mock/conf"
 	"github.com/kaifei-bianjie/mock/types"
 	"github.com/kaifei-bianjie/mock/util/constants"
@@ -105,35 +105,44 @@ func GenSignedTxData(senderInfo types.AccountInfo, receiver string, resChan chan
 		ChanNum: chanNum,
 	}
 
+	defer func() {
+		if err := recover(); err != nil {
+			log.Printf("%v: failed: %v\n", method, err)
+		}
+
+		//log.Printf("%v: signed tx data: %v\n", method, signedTxDataRes.Res)
+		resChan <- signedTxDataRes
+	}()
+
 	// build unsigned tx
 	unsignedTxBytes, err := tx.SendTransferTx(senderInfo, receiver, "0.01iris", true)
 	if err != nil {
 		log.Printf("%v: build unsigned tx failed: %v\n", method, err)
-		resChan <- signedTxDataRes
+		return
 	}
 	err = Cdc.UnmarshalJSON(unsignedTxBytes, &unsignedTx)
 	if err != nil {
 		log.Printf("%v: build unsigned tx failed: %v\n", method, err)
-		resChan <- signedTxDataRes
+		return
 	}
 
 	// sign tx
 	signedTxBytes, err := signTx(unsignedTx, senderInfo)
 	if err != nil {
 		log.Printf("%v: sign tx failed: %v\n", method, err)
-		resChan <- signedTxDataRes
+		return
 	}
 	err = Cdc.UnmarshalJSON(signedTxBytes, &signedTx)
 	if err != nil {
 		log.Printf("%v: sign tx failed: %v\n", method, err)
-		resChan <- signedTxDataRes
+		return
 	}
 
 	// build signed data
 	msgBytes, err := Cdc.MarshalJSON(signedTx.Msgs[0])
 	if err != nil {
 		log.Printf("%v: build post tx data failed: %v\n", method, err)
-		resChan <- signedTxDataRes
+		return
 	}
 
 	signature := signedTx.Signatures[0]
@@ -159,11 +168,9 @@ func GenSignedTxData(senderInfo types.AccountInfo, receiver string, resChan chan
 
 	if err != nil {
 		log.Printf("%v: cdc marshal json fail: %v\n", method, err)
-		resChan <- signedTxDataRes
+		return
 	}
 	signedTxDataRes.Res = base64.StdEncoding.EncodeToString(postTxBytes)
-
-	resChan <- signedTxDataRes
 
 	//if err != nil {
 	//	log.Printf("broadcast tx failed: %v\n", err)

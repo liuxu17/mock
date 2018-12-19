@@ -1,14 +1,13 @@
 package tx
 
 import (
-	"fmt"
-	"github.com/kaifei-bianjie/mock/types"
-	"github.com/kaifei-bianjie/mock/conf"
-	"encoding/json"
 	"bytes"
-	"github.com/kaifei-bianjie/mock/util/helper"
+	"encoding/json"
+	"fmt"
+	"github.com/kaifei-bianjie/mock/conf"
+	"github.com/kaifei-bianjie/mock/types"
 	"github.com/kaifei-bianjie/mock/util/constants"
-	"log"
+	"github.com/kaifei-bianjie/mock/util/helper"
 )
 
 // send tokens from mockFaucet account to given address
@@ -52,11 +51,6 @@ func SendTransferTx(senderInfo types.AccountInfo, receiver string, amount string
 	if statusCode == constants.StatusCodeOk {
 		return resBytes, nil
 	} else {
-		log.Printf("transfer token fail: %v\n", string(resBytes))
-		errRes := types.ErrorRes{}
-		if err := json.Unmarshal(resBytes, &errRes); err != nil {
-			return nil, err
-		}
-		return nil, fmt.Errorf("err code: %v, err msg: %v", errRes.Code, errRes.ErrorMessage)
+		return nil, fmt.Errorf("transfer token fail: %v\n", string(resBytes))
 	}
 }

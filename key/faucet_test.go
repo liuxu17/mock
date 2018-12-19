@@ -12,7 +12,7 @@ import (
 )
 
 var (
-	faucetName = "mock-faucet-007"
+	faucetName = "mock-faucet-001"
 )
 
 func TestMain(m *testing.M) {
@@ -20,7 +20,7 @@ func TestMain(m *testing.M) {
 	conf.NodeUrl = "http://localhost:1317"
 	conf.ChainId = "rainbow-dev"
 	conf.BlockInterval = 5
-	conf.FaucetSeed = "recycle light kid spider fire disorder relax end stool hip child leaf wild next veteran start theory pretty salt rich avocado card enact april"
+	conf.FaucetSeed = "cube water sing thunder rib buyer assume rebuild cigar earn slight canoe apart grocery image satisfy genre woman mother can client science this tag"
 
 	// create faucet account
 	addr, err := account.CreateAccount(faucetName, constants.MockFaucetPassword, conf.FaucetSeed)

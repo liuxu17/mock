@@ -28,17 +28,17 @@
 [[constraint]]
   name = "github.com/irisnet/irishub"
   source = "https://github.com/irisnet/irishub.git"
-  version = "=v0.7.0"
-
-[[override]]
-  name = "github.com/cosmos/cosmos-sdk"
-  source = "https://github.com/irisnet/cosmos-sdk.git"
-  version = "=v0.26.0-iris0.7.0"
+  version = "=v0.8.0"
 
 [[override]]
   name = "github.com/tendermint/tendermint"
   source = "https://github.com/irisnet/tendermint.git"
-  version = "=v0.26.1-rc0-iris"
+  version = "=v0.27.0-dev1-iris"
+
+[[constraint]]
+  name = "github.com/satori/go.uuid"
+  source = "https://github.com/satori/go.uuid.git"
+  version = "=v1.2.0"
 
 [prune]
   go-tests = true

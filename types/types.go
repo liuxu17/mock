@@ -1,6 +1,6 @@
 package types
 
-import "github.com/cosmos/cosmos-sdk/x/auth"
+import "github.com/irisnet/irishub/modules/auth"
 
 type AccountInfo struct {
 	LocalAccountName string `json:"name"`
@@ -65,8 +65,8 @@ type PostTxReq struct {
 }
 
 type GenSignedTxDataRes struct {
-	Res string
-	ChanNum  int
+	Res     string
+	ChanNum int
 }
 
 type PostTx struct {
