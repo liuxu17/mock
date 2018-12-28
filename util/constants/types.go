@@ -21,6 +21,11 @@ const (
 	StatusCodeOk       = 200
 	StatusCodeConflict = 409
 
+	//go routine delay time
+	CreateNewAccountDelaySec   = 4
+	CheckAccountInfoDelaySec   = 2
+	SignTxDelaySec 			   = 2
+
 	//
 	MockFaucetName     = "mock-faucet"
 	MockFaucetPassword = "1234567890"
@@ -28,4 +33,5 @@ const (
 	MockDefaultGas     = "200000"
 	MockDefaultFee     = "0.01iris"
 	Denom              = "iris"
+
 )

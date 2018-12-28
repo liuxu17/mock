@@ -15,12 +15,15 @@ import (
 func HttpClientPostJsonData(uri string, requestBody *bytes.Buffer) (int, []byte, error) {
 	url := conf.NodeUrl + uri
 	res, err := http.Post(url, constants.HeaderContentTypeJson, requestBody)
-	defer res.Body.Close()
 
 	if err != nil {
 		return 0, nil, err
 	}
 
+	if res == nil {
+		return 0, nil, err
+	}
+	defer res.Body.Close()
 	resByte, err := ioutil.ReadAll(res.Body)
 
 	if err != nil {
@@ -38,7 +41,10 @@ func HttpClientGetData(uri string) (int, []byte, error) {
 	if err != nil {
 		return 0, nil, err
 	}
-
+	if res == nil {
+		return 0, nil, err
+	}
+	defer res.Body.Close()
 	resByte, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		return 0, nil, err

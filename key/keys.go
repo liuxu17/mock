@@ -22,14 +22,18 @@ func NewAccount(num int, subFaucets []conf.SubFaucet) ([]types.AccountInfo, erro
 		method                                          = "NewAccount"
 	)
 
-	createKeyChan := make(chan types.AccountInfo)
+	createKeyChan := make(chan types.AccountInfo,10000)
 	distributeChan := make(chan []types.AccountInfo)
-	accInfoChan := make(chan types.AccountInfo)
+	accInfoChan := make(chan types.AccountInfo, 10000)
 
 	// use goroutine to create account
 	for i := 1; i <= num; i++ {
 		keyName := account.GenKeyName(constants.KeyNamePrefix, i)
 		go CreateKey(keyName, createKeyChan)
+		//go CreateKey(keyName, createKeyChan)
+		if ( (i % 20) == 0 ){
+			time.Sleep(time.Second * constants.CreateNewAccountDelaySec)
+		}
 	}
 
 	counter := 0
@@ -133,8 +137,13 @@ func NewAccount(num int, subFaucets []conf.SubFaucet) ([]types.AccountInfo, erro
 
 	// use goroutine to get accountInfo
 	if len(distributedTokenAccs) >= 1 {
+		counter = 0
 		for _, acc := range distributedTokenAccs {
 			go GetAccountInfo(acc, accInfoChan)
+			counter++
+			if ( (counter % 20) == 0 ){
+				time.Sleep(time.Second * constants.CheckAccountInfoDelaySec)
+			}
 		}
 
 		counter = 0
@@ -166,7 +175,8 @@ func CreateKey(keyName string, accChan chan types.AccountInfo) {
 	address, err := account.CreateAccount(keyName, constants.KeyPassword, "")
 	if err != nil {
 		log.Printf("%v: create key fail: %v\n", method, err)
-		accChan <- accountInfo
+		return
+		//accChan <- accountInfo
 	}
 	log.Printf("%v: account which name is %v create success\n",
 		method, keyName)
@@ -204,10 +214,11 @@ func GetAccountInfo(accInfo types.AccountInfo, accInfoChan chan types.AccountInf
 	// get account info
 	acc, err := account.GetAccountInfo(accInfo.Address)
 	if err != nil {
-		log.Printf("%v: get %v info fail: %v\n",
+		log.Printf("%v: get %v info fail: %v !!!!!!!!!!!!\n",
 			method, accInfo.LocalAccountName, err)
-		accInfoChan <- accInfo
+		return
 	}
+	log.Printf("%v: get %v info success\n", method, accInfo.LocalAccountName)
 	accInfo.AccountNumber = acc.AccountNumber
 	accInfo.Sequence = acc.Sequence
 	accInfoChan <- accInfo

@@ -2,7 +2,6 @@ package sign
 
 import (
 	"bytes"
-	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"github.com/irisnet/irishub/codec"
@@ -170,7 +169,8 @@ func GenSignedTxData(senderInfo types.AccountInfo, receiver string, resChan chan
 		log.Printf("%v: cdc marshal json fail: %v\n", method, err)
 		return
 	}
-	signedTxDataRes.Res = base64.StdEncoding.EncodeToString(postTxBytes)
+
+	signedTxDataRes.Res = string(postTxBytes)
 
 	//if err != nil {
 	//	log.Printf("broadcast tx failed: %v\n", err)

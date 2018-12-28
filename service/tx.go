@@ -5,7 +5,9 @@ import (
 	"github.com/kaifei-bianjie/mock/key"
 	"github.com/kaifei-bianjie/mock/sign"
 	"github.com/kaifei-bianjie/mock/types"
+	"github.com/kaifei-bianjie/mock/util/constants"
 	"log"
+	"time"
 )
 
 func BatchGenSignedTxData(num int, subFaucets []conf.SubFaucet) []string {
@@ -13,7 +15,7 @@ func BatchGenSignedTxData(num int, subFaucets []conf.SubFaucet) []string {
 		method       = "BatchGenSignedTx"
 		signedTxData []string
 	)
-	resChan := make(chan types.GenSignedTxDataRes)
+	resChan := make(chan types.GenSignedTxDataRes, 10000)
 
 	senderInfos, err := key.NewAccount(num, subFaucets)
 	if err != nil {
@@ -27,6 +29,9 @@ func BatchGenSignedTxData(num int, subFaucets []conf.SubFaucet) []string {
 
 		for i, senderInfo := range senderInfos {
 			go sign.GenSignedTxData(senderInfo, conf.DefaultReceiverAddr, resChan, i)
+			if ( (i % 20) == 0 ){
+				time.Sleep(time.Second * constants.SignTxDelaySec)
+			}
 		}
 
 		counter := 0
