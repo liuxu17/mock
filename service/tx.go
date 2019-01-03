@@ -29,7 +29,7 @@ func BatchGenSignedTxData(num int, subFaucets []conf.SubFaucet) []string {
 
 		for i, senderInfo := range senderInfos {
 			go sign.GenSignedTxData(senderInfo, conf.DefaultReceiverAddr, resChan, i)
-			if ( (i % 20) == 0 ){
+			if (i % 20) == 0 {
 				time.Sleep(time.Second * constants.SignTxDelaySec)
 			}
 		}
@@ -57,4 +57,58 @@ func BatchGenSignedTxData(num int, subFaucets []conf.SubFaucet) []string {
 	}
 
 	return signedTxData
+}
+
+func SingleBatchGenSignedTxData(num int, faucet string, password string, home string, faucetAddr string) []string {
+	resChan := make(chan types.GenSignedTxDataRes, 10000)
+
+	senderInfos, err := key.NewAccountSingle(num, home, faucet, faucetAddr)
+	if err != nil {
+		// TODO: handle err
+	}
+
+	lens := len(senderInfos)
+	var (
+		method       = "BatchGenSignedTx"
+		signedTxData [100000]string
+	)
+	if lens > 0 {
+		log.Printf("%v: now use %v goroutine to gen signed data\n",
+			method, lens)
+
+		for i, senderInfo := range senderInfos {
+			go sign.GenSignedTxDataFromSingleFaucet(faucetAddr, senderInfo, conf.DefaultReceiverAddr, resChan, i)
+			if (i % 10) == 0 {
+				time.Sleep(time.Second * constants.SignTxDelaySec)
+			}
+		}
+
+		counter := 0
+		for {
+			res := <-resChan
+			counter++
+			if res.Res != "" {
+				log.Printf("%v: successed, goroutine %v gen signed tx data. now left %v goroutine\n",
+					method, res.ChanNum, lens-counter)
+				signedTxData[res.ChanNum] = res.Res
+				//signedTxData = append(signedTxData, res.Res)
+			} else {
+				log.Printf("%v: failed, goroutine %v gen signed tx data. now left %v goroutine\n",
+					method, res.ChanNum, lens-counter)
+			}
+
+			if counter == lens {
+				log.Printf("%v: all sign tx goroutine over\n", method)
+				break
+			}
+		}
+	} else {
+		log.Printf("%v: no signed tx data\n", method)
+	}
+
+	var signedTxDataReturn []string
+	for j:=0; j < lens; j++{
+		signedTxDataReturn = append(signedTxDataReturn, signedTxData[j])
+	}
+	return signedTxDataReturn
 }

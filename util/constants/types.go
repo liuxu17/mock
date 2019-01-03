@@ -13,6 +13,7 @@ const (
 	// http uri
 	UriKeyCreate     = "/keys"
 	UriAccountInfo   = "/auth/accounts/%v"           // format is /auth/accounts/{address}
+	UriKeyInfo       = "/keys/%v"                    // format is /auth/accounts/{address}
 	UriTransfer      = "/bank/accounts/%s/transfers" // format is /bank/accounts/{address}/transfers
 	UriTxSign        = "/tx/sign"
 	UriTxBroadcastTx = "/txs/send"
@@ -22,9 +23,11 @@ const (
 	StatusCodeConflict = 409
 
 	//go routine delay time
-	CreateNewAccountDelaySec   = 4
-	CheckAccountInfoDelaySec   = 2
-	SignTxDelaySec 			   = 2
+	CreateNewAccountDelaySec = 4
+	CheckAccountInfoDelaySec = 2
+	SignTxDelaySec           = 1
+
+	KeysAddCmd = "iriscli keys add "
 
 	//
 	MockFaucetName     = "mock-faucet"
@@ -33,5 +36,4 @@ const (
 	MockDefaultGas     = "200000"
 	MockDefaultFee     = "0.01iris"
 	Denom              = "iris"
-
 )

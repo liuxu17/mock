@@ -37,11 +37,6 @@ var (
 
 //custom tx codec
 func init() {
-	config := sdk.GetConfig()
-	config.SetBech32PrefixForAccount(Bech32PrefixAccAddr, Bech32PrefixAccPub)
-	config.SetBech32PrefixForValidator(Bech32PrefixValAddr, Bech32PrefixValPub)
-	config.SetBech32PrefixForConsensusNode(Bech32PrefixConsAddr, Bech32PrefixConsPub)
-	config.Seal()
 
 	var cdc = codec.New()
 	bank.RegisterCodec(cdc)
@@ -52,7 +47,7 @@ func init() {
 }
 
 // sign tx
-func signTx(unsignedTx auth.StdTx, senderInfo types.AccountInfo) ([]byte, error) {
+func signTx(unsignedTx types.TxDataRes, senderInfo types.AccountInfo) ([]byte, error) {
 	// build request
 	accountNumber, err := helper.ConvertStrToInt64(senderInfo.AccountNumber)
 	if err != nil {
@@ -63,17 +58,18 @@ func signTx(unsignedTx auth.StdTx, senderInfo types.AccountInfo) ([]byte, error)
 		return nil, err
 	}
 	signTxReq := types.SignTxReq{
-		Tx:            unsignedTx,
+		Tx:            unsignedTx.Value,
 		Name:          senderInfo.LocalAccountName,
 		Password:      senderInfo.Password,
 		ChainID:       conf.ChainId,
-		AccountNumber: accountNumber,
-		Sequence:      sequence,
+		AccountNumber: fmt.Sprintf("%d",accountNumber),
+		Sequence:      fmt.Sprintf("%d",sequence),
 		AppendSig:     true,
 	}
 
 	// send sign tx request
-	reqBytes, err := Cdc.MarshalJSON(signTxReq)
+	reqBytes, err := json.Marshal(signTxReq)
+	log.Printf("%s\n", reqBytes)
 	if err != nil {
 		return nil, err
 	}
@@ -96,6 +92,7 @@ func signTx(unsignedTx auth.StdTx, senderInfo types.AccountInfo) ([]byte, error)
 func GenSignedTxData(senderInfo types.AccountInfo, receiver string, resChan chan types.GenSignedTxDataRes, chanNum int) {
 	var (
 		unsignedTx, signedTx auth.StdTx
+		uu types.TxDataRes
 		method               = "GenSignedTxData"
 	)
 	log.Printf("%v: %v goroutine begin gen signed data\n", method, chanNum)
@@ -126,7 +123,7 @@ func GenSignedTxData(senderInfo types.AccountInfo, receiver string, resChan chan
 	}
 
 	// sign tx
-	signedTxBytes, err := signTx(unsignedTx, senderInfo)
+	signedTxBytes, err := signTx(uu, senderInfo)
 	if err != nil {
 		log.Printf("%v: sign tx failed: %v\n", method, err)
 		return
@@ -137,30 +134,142 @@ func GenSignedTxData(senderInfo types.AccountInfo, receiver string, resChan chan
 		return
 	}
 
-	// build signed data
-	msgBytes, err := Cdc.MarshalJSON(signedTx.Msgs[0])
+	/*	// build signed data
+		msgBytes, err := Cdc.MarshalJSON(signedTx.Msgs[0])
+		if err != nil {
+			log.Printf("%v: build post tx data failed: %v\n", method, err)
+			return
+		}
+
+		signature := signedTx.Signatures[0]
+
+		stdSign := types.StdSignature{
+			PubKey:        signature.PubKey.Bytes(),
+			Signature:     signature.Signature,
+			AccountNumber: signature.AccountNumber,
+			Sequence:      signature.Sequence,
+		}
+
+		postTx := types.PostTx{
+			Msgs: []string{string(msgBytes)},
+			Fee: types.StdFee{
+				Amount: signedTx.Fee.Amount,
+				Gas:    uint64(signedTx.Fee.Gas),
+			},
+			Signatures: []types.StdSignature{stdSign},
+			Memo:       signedTx.Memo,
+		}
+
+		postTxBytes, err := json.Marshal(postTx)
+
+		if err != nil {
+			log.Printf("%v: cdc marshal json fail: %v\n", method, err)
+			return
+		}
+
+		signedTxDataRes.Res = string(postTxBytes)*/
+
+	//if err != nil {
+	//	log.Printf("broadcast tx failed: %v\n", err)
+	//	return nil, err
+	//}
+	//reqBuffer := bytes.NewBuffer(reqBytes)
+	//
+	//statusCode, resBytes, err := helper.HttpClientPostJsonData(constants.UriTxBroadcastTx, reqBuffer)
+	//
+	//if err != nil {
+	//	log.Printf("broadcast tx failed: %v\n", err)
+	//	return nil, err
+	//}
+	//
+	//if statusCode != constants.StatusCodeOk {
+	//	log.Printf("broadcast tx failed, unexcepted status code: %v\n", statusCode)
+	//	return nil, err
+	//}
+	//
+	//return resBytes, nil
+}
+
+// generate signed tx
+func GenSignedTxDataFromSingleFaucet(faucetAddr string, senderInfo types.AccountInfo, receiver string, resChan chan types.GenSignedTxDataRes, chanNum int) {
+	var (
+		unsignedTx, signedTx types.TxDataRes
+		method               = "GenSignedTxData"
+	)
+	log.Printf("%v: %v goroutine begin gen signed data\n", method, chanNum)
+
+	signedTxDataRes := types.GenSignedTxDataRes{
+		ChanNum: chanNum,
+	}
+
+	defer func() {
+		if err := recover(); err != nil {
+			log.Printf("%v: failed: %v\n", method, err)
+		}
+
+		//log.Printf("%v: signed tx data: %v\n", method, signedTxDataRes.Res)
+		resChan <- signedTxDataRes
+	}()
+
+	// build unsigned tx
+	unsignedTxBytes, err := tx.SendTransferTxFromFaucet(senderInfo, faucetAddr, "0.01iris", true)
 	if err != nil {
-		log.Printf("%v: build post tx data failed: %v\n", method, err)
+		log.Printf("%v: build unsigned tx failed: %v\n", method, err)
+		return
+	}
+	//log.Printf("%s\n", unsignedTxBytes)
+	err = json.Unmarshal(unsignedTxBytes, &unsignedTx)
+	//err = Cdc.UnmarshalJSON(unsignedTxBytes, &unsignedTx)
+	if err != nil {
+		log.Printf("%v: build unsigned tx failed: %v\n", method, err)
 		return
 	}
 
-	signature := signedTx.Signatures[0]
+	// sign tx
+	//fmt.Println(unsignedTx)
+	signedTxBytes, err := signTx(unsignedTx, senderInfo)
+	if err != nil {
+		log.Printf("%v: sign tx failed: %v\n", method, err)
+		return
+	}
+	//log.Printf("%s\n", signedTxBytes)
+
+	err = json.Unmarshal(signedTxBytes, &signedTx)
+	if err != nil {
+		log.Printf("%v: sign tx failed: %v\n", method, err)
+		return
+	}
+
+
+	// build signed data
+/*	msgBytes, err := Cdc.MarshalJSON(signedTx.Value.Msgs[0])
+	if err != nil {
+		log.Printf("%v: build post tx data failed: %v\n", method, err)
+		return
+	}*/
+
+
+	/*signature := signedTx.Value.Signatures[0]
 
 	stdSign := types.StdSignature{
-		PubKey:        signature.PubKey.Bytes(),
+		PubKey:        signature.PubKey,
 		Signature:     signature.Signature,
 		AccountNumber: signature.AccountNumber,
 		Sequence:      signature.Sequence,
 	}
 
 	postTx := types.PostTx{
-		Msgs: []string{string(msgBytes)},
-		Fee: auth.StdFee{
-			Amount: signedTx.Fee.Amount,
-			Gas:    int64(signedTx.Fee.Gas),
+		Msgs: signedTx.Value.Msgs,
+		Fee: types.StdFee{
+			Amount: signedTx.Value.Fee.Amount,
+			Gas:    signedTx.Value.Fee.Gas,
 		},
 		Signatures: []types.StdSignature{stdSign},
-		Memo:       signedTx.Memo,
+		Memo:       signedTx.Value.Memo,
+	}*/
+
+	postTx := types.TxBroadcast{
+		Tx : signedTx.Value,
 	}
 
 	postTxBytes, err := json.Marshal(postTx)

@@ -12,6 +12,7 @@ func main() {
 	rootCmd.AddCommand(
 		cmd.FaucetInitCmd(),
 		cmd.GenSignedTxDataCmd(),
+		cmd.SingleAccGenSignedTxDataCmd(),
 	)
 
 	executor := prepareMainCmd(rootCmd)

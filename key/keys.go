@@ -9,8 +9,66 @@ import (
 	"github.com/kaifei-bianjie/mock/util/helper/account"
 	"github.com/kaifei-bianjie/mock/util/helper/tx"
 	"log"
+	"strconv"
 	"time"
 )
+
+// new account do follow things:
+// 1. create key
+// 2. faucet transfer token to these accounts
+// 3. get account info(account_number and sequence)
+func NewAccountSingle(num int, home string, faucet string, faucetAddr string) ([]types.AccountInfo, error) {
+	var (
+		createdAccs []types.AccountInfo
+		//distributedTokenAccs, accountsInfo []types.AccountInfo
+		method = "NewAccount"
+	)
+/*	faucetAddr, err := account.GetAccAddr(faucet)
+	if err != nil {
+		log.Printf("%v: cannot get %v address fail: %v !!!!!!!!!!!!\n",
+			method, faucet, err)
+		return nil, err
+	}*/
+
+	acc, err := account.GetAccountInfo(faucetAddr)
+	if err != nil {
+		log.Printf("%v: get %v info fail: %v !!!!!!!!!!!!\n",
+			method, faucet, err)
+		return nil, err
+	}
+
+	createKeyChan := make(chan types.AccountInfo, 100000)
+
+	// create account by cmd
+	sequence, err :=strconv.Atoi(acc.Sequence)
+	if err != nil {
+		return nil, err
+	}
+
+	for i := 1; i <= num; i++ {
+		keyName := account.GenKeyName(constants.KeyNamePrefix, i)
+		CreateKeyByCmd(faucet, strconv.Itoa(sequence), acc.AccountNumber, keyName, createKeyChan, home)
+		sequence = sequence + 1
+		//go CreateKey(keyName, createKeyChan)
+	}
+
+	counter := 0
+	for {
+		accInfo := <-createKeyChan
+		if accInfo.Address != "" {
+			createdAccs = append(createdAccs, accInfo)
+		}
+		counter++
+		if counter == num {
+			log.Printf("%v: all create key goroutine over\n", method)
+			log.Printf("%v: except create %v accounts, successful create %v accounts",
+				method, num, len(createdAccs))
+			break
+		}
+	}
+
+	return createdAccs, nil
+}
 
 // new account do follow things:
 // 1. create key
@@ -22,7 +80,7 @@ func NewAccount(num int, subFaucets []conf.SubFaucet) ([]types.AccountInfo, erro
 		method                                          = "NewAccount"
 	)
 
-	createKeyChan := make(chan types.AccountInfo,10000)
+	createKeyChan := make(chan types.AccountInfo, 10000)
 	distributeChan := make(chan []types.AccountInfo)
 	accInfoChan := make(chan types.AccountInfo, 10000)
 
@@ -31,7 +89,7 @@ func NewAccount(num int, subFaucets []conf.SubFaucet) ([]types.AccountInfo, erro
 		keyName := account.GenKeyName(constants.KeyNamePrefix, i)
 		go CreateKey(keyName, createKeyChan)
 		//go CreateKey(keyName, createKeyChan)
-		if ( (i % 20) == 0 ){
+		if (i % 20) == 0 {
 			time.Sleep(time.Second * constants.CreateNewAccountDelaySec)
 		}
 	}
@@ -141,7 +199,7 @@ func NewAccount(num int, subFaucets []conf.SubFaucet) ([]types.AccountInfo, erro
 		for _, acc := range distributedTokenAccs {
 			go GetAccountInfo(acc, accInfoChan)
 			counter++
-			if ( (counter % 20) == 0 ){
+			if (counter % 20) == 0 {
 				time.Sleep(time.Second * constants.CheckAccountInfoDelaySec)
 			}
 		}
@@ -183,6 +241,32 @@ func CreateKey(keyName string, accChan chan types.AccountInfo) {
 
 	accountInfo.LocalAccountName = keyName
 	accountInfo.Password = constants.KeyPassword
+	accountInfo.Address = address
+
+	accChan <- accountInfo
+}
+
+// create key and return accountInfo by channel
+func CreateKeyByCmd(faucetName string, sequence string, AccountNum string, keyName string, accChan chan types.AccountInfo, home string) {
+	var (
+		accountInfo types.AccountInfo
+		method      = "CreateKey"
+	)
+
+	// create account
+	address, err := account.CreateAccountByCmd(keyName, constants.KeyPassword, home)
+	if err != nil {
+		log.Printf("%v: create key fail: %v\n", method, err)
+		return
+		//accChan <- accountInfo
+	}
+	log.Printf("%v: account which name is %v create success\n",
+		method, keyName)
+
+	accountInfo.LocalAccountName = faucetName
+	accountInfo.Password = constants.KeyPassword
+	accountInfo.Sequence = sequence
+	accountInfo.AccountNumber = AccountNum
 	accountInfo.Address = address
 
 	accChan <- accountInfo

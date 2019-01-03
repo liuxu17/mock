@@ -1,6 +1,9 @@
 package types
 
-import "github.com/irisnet/irishub/modules/auth"
+import (
+	"github.com/irisnet/irishub/modules/auth"
+	"github.com/irisnet/irishub/types"
+)
 
 type AccountInfo struct {
 	LocalAccountName string `json:"name"`
@@ -51,13 +54,13 @@ type KeyCreateRes struct {
 }
 
 type SignTxReq struct {
-	Tx            auth.StdTx `json:"tx"`
-	Name          string     `json:"name"`
-	Password      string     `json:"password"`
-	ChainID       string     `json:"chain_id"`
-	AccountNumber int64      `json:"account_number"`
-	Sequence      int64      `json:"sequence"`
-	AppendSig     bool       `json:"append_sig"`
+	Tx            PostTx `json:"tx"`
+	Name          string `json:"name"`
+	Password      string `json:"password"`
+	ChainID       string `json:"chain_id"`
+	AccountNumber string `json:"account_number"`
+	Sequence      string `json:"sequence"`
+	AppendSig     bool   `json:"append_sig"`
 }
 
 type PostTxReq struct {
@@ -70,15 +73,56 @@ type GenSignedTxDataRes struct {
 }
 
 type PostTx struct {
-	Msgs       []string       `json:"msgs"`
-	Fee        auth.StdFee    `json:"fee"`
+	Msgs       []TxDataInfo   `json:"msg"`
+	Fee        StdFee         `json:"fee"`
 	Signatures []StdSignature `json:"signatures"`
 	Memo       string         `json:"memo"`
 }
 
+type StdFee struct {
+	Amount types.Coins `json:"amount"`
+	Gas    string      `json:"gas"`
+}
+
 type StdSignature struct {
-	PubKey        []byte `json:"pub_key"` // optional
-	Signature     []byte `json:"signature"`
-	AccountNumber int64  `json:"account_number"`
-	Sequence      int64  `json:"sequence"`
+	PubKey        PubKey `json:"pub_key"` // optional
+	Signature     string `json:"signature"`
+	AccountNumber string `json:"account_number"`
+	Sequence      string `json:"sequence"`
+}
+
+type PubKey struct {
+	Type  string `json:"type"` // optional
+	Value string `json:"value"`
+}
+
+type KeyInfo struct {
+	PubKey  string `json:"pub_key"`
+	Address string `json:"address"`
+	Name    string `json:"name"`
+	KeyType string `json:"type"`
+}
+
+type TxDataRes struct {
+	Type  string `json:"type"`
+	Value PostTx `json:"value"`
+}
+
+type TxDataInfo struct {
+	Type  string      `json:"type"`
+	Value TxDataValue `json:"value"`
+}
+
+type TxDataValue struct {
+	Input  []InOutPutData `json:"inputs"`
+	Output []InOutPutData `json:"outputs"`
+}
+
+type InOutPutData struct {
+	Address string      `json:"address"`
+	Amount  types.Coins `json:"coins"`
+}
+
+type TxBroadcast struct {
+	Tx PostTx `json:"tx"`
 }
