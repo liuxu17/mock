@@ -27,13 +27,14 @@ const (
 	CheckAccountInfoDelaySec = 2
 	SignTxDelaySec           = 1
 
-	KeysAddCmd = "iriscli keys add "
+	KeysAddCmd  = "iriscli keys add "
+	KeysShowCmd = "iriscli keys show "
 
 	//
 	MockFaucetName     = "mock-faucet"
 	MockFaucetPassword = "1234567890"
 	MockTransferAmount = "0.03iris"
-	MockDefaultGas     = "200000"
+	MockDefaultGas     = "20000"
 	MockDefaultFee     = "0.01iris"
 	Denom              = "iris"
 )

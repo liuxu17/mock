@@ -27,6 +27,7 @@ var (
 	faucetFlagSet   = pflag.NewFlagSet("", pflag.ContinueOnError)
 	txFlagSet       = pflag.NewFlagSet("", pflag.ContinueOnError)
 	singleTxFlagSet = pflag.NewFlagSet("", pflag.ContinueOnError)
+	multiTxFlagSet  = pflag.NewFlagSet("", pflag.ContinueOnError)
 )
 
 func init() {
@@ -51,5 +52,10 @@ func init() {
 	singleTxFlagSet.String(FlagConfDir, conf.DefaultHome, "directory of config file")
 	singleTxFlagSet.String(FlagFaucetAddress, "", "faucet address")
 
+	multiTxFlagSet.StringVarP(&conf.FaucetName, FlagFaucetName, "", "", "faucet name")
+	multiTxFlagSet.Int(FlagNumSignedTx, 0, "num of signed tx which need to generated")
+	multiTxFlagSet.String(FlagResOutput, os.ExpandEnv("$HOME")+"/output", "output directory of result file which content signed tx data")
+	multiTxFlagSet.String(FlagConfDir, conf.DefaultHome, "directory of config file")
+	multiTxFlagSet.String(FlagFaucetAddress, "", "faucet address")
 
 }

@@ -120,25 +120,53 @@ func GetAccountInfo(address string) (types.AccountInfoRes, error) {
 }
 
 // get account address by name
-func GetAccAddr(name string) (types.KeyInfo, error) {
-	var (
-		accountInfo types.KeyInfo
-	)
-	uri := fmt.Sprintf(constants.UriKeyInfo, name)
-	statusCode, resByte, err := helper.HttpClientGetData(uri)
+func GetAccAddr(name string, home string) (string, error) {
+	cmdStr := constants.KeysShowCmd + name + " --home=" + home
+	cmd := getCmd(cmdStr, nil)
+	//cmd = exec.Command(constants.KeysAddCmd + name + " --home=" + home)
+	stderr, _ := cmd.StderrPipe()
+	stdout, _ := cmd.StdoutPipe()
 
-	if err != nil {
-		return accountInfo, err
+	if err := cmd.Start(); err != nil {
+		log.Println(err)
 	}
 
-	if statusCode == constants.StatusCodeOk {
-		if err := json.Unmarshal(resByte, &accountInfo); err != nil {
+	errmsg, _ := ioutil.ReadAll(stderr)
+	output, _ := ioutil.ReadAll(stdout)
+
+	if err := cmd.Wait(); err != nil {
+		log.Printf("Command finished with error: %v, %v", err.Error(), string(errmsg))
+		return "", err
+	}
+	msg := string(output)
+	//log.Printf("Command finished with response: %v", msg)
+
+	if strings.Contains(msg, "ADDRESS:") {
+		index := strings.Index(msg, "local") + 6
+		address := string(msg[index : index+42])
+		log.Printf("Found the account %v with address %v", name, address)
+		return address, nil
+	}
+
+	return "", fmt.Errorf("the responseBody is wrong during the check process")
+	/*	var (
+			accountInfo types.KeyInfo
+		)
+		uri := fmt.Sprintf(constants.UriKeyInfo, name)
+		statusCode, resByte, err := helper.HttpClientGetData(uri)
+
+		if err != nil {
 			return accountInfo, err
 		}
-		return accountInfo, nil
-	} else {
-		return accountInfo, fmt.Errorf("status code is not ok, code: %v", statusCode)
-	}
+
+		if statusCode == constants.StatusCodeOk {
+			if err := json.Unmarshal(resByte, &accountInfo); err != nil {
+				return accountInfo, err
+			}
+			return accountInfo, nil
+		} else {
+			return accountInfo, fmt.Errorf("status code is not ok, code: %v", statusCode)
+		}*/
 }
 
 func getCmd(command string, escapeParams []string) *exec.Cmd {

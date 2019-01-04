@@ -23,12 +23,6 @@ func NewAccountSingle(num int, home string, faucet string, faucetAddr string) ([
 		//distributedTokenAccs, accountsInfo []types.AccountInfo
 		method = "NewAccount"
 	)
-/*	faucetAddr, err := account.GetAccAddr(faucet)
-	if err != nil {
-		log.Printf("%v: cannot get %v address fail: %v !!!!!!!!!!!!\n",
-			method, faucet, err)
-		return nil, err
-	}*/
 
 	acc, err := account.GetAccountInfo(faucetAddr)
 	if err != nil {
@@ -40,7 +34,7 @@ func NewAccountSingle(num int, home string, faucet string, faucetAddr string) ([
 	createKeyChan := make(chan types.AccountInfo, 100000)
 
 	// create account by cmd
-	sequence, err :=strconv.Atoi(acc.Sequence)
+	sequence, err := strconv.Atoi(acc.Sequence)
 	if err != nil {
 		return nil, err
 	}

@@ -62,8 +62,8 @@ func signTx(unsignedTx types.TxDataRes, senderInfo types.AccountInfo) ([]byte, e
 		Name:          senderInfo.LocalAccountName,
 		Password:      senderInfo.Password,
 		ChainID:       conf.ChainId,
-		AccountNumber: fmt.Sprintf("%d",accountNumber),
-		Sequence:      fmt.Sprintf("%d",sequence),
+		AccountNumber: fmt.Sprintf("%d", accountNumber),
+		Sequence:      fmt.Sprintf("%d", sequence),
 		AppendSig:     true,
 	}
 
@@ -92,7 +92,7 @@ func signTx(unsignedTx types.TxDataRes, senderInfo types.AccountInfo) ([]byte, e
 func GenSignedTxData(senderInfo types.AccountInfo, receiver string, resChan chan types.GenSignedTxDataRes, chanNum int) {
 	var (
 		unsignedTx, signedTx auth.StdTx
-		uu types.TxDataRes
+		uu                   types.TxDataRes
 		method               = "GenSignedTxData"
 	)
 	log.Printf("%v: %v goroutine begin gen signed data\n", method, chanNum)
@@ -240,14 +240,12 @@ func GenSignedTxDataFromSingleFaucet(faucetAddr string, senderInfo types.Account
 		return
 	}
 
-
 	// build signed data
-/*	msgBytes, err := Cdc.MarshalJSON(signedTx.Value.Msgs[0])
-	if err != nil {
-		log.Printf("%v: build post tx data failed: %v\n", method, err)
-		return
-	}*/
-
+	/*	msgBytes, err := Cdc.MarshalJSON(signedTx.Value.Msgs[0])
+		if err != nil {
+			log.Printf("%v: build post tx data failed: %v\n", method, err)
+			return
+		}*/
 
 	/*signature := signedTx.Value.Signatures[0]
 
@@ -269,7 +267,7 @@ func GenSignedTxDataFromSingleFaucet(faucetAddr string, senderInfo types.Account
 	}*/
 
 	postTx := types.TxBroadcast{
-		Tx : signedTx.Value,
+		Tx: signedTx.Value,
 	}
 
 	postTxBytes, err := json.Marshal(postTx)

@@ -6,6 +6,7 @@ import (
 	"github.com/kaifei-bianjie/mock/sign"
 	"github.com/kaifei-bianjie/mock/types"
 	"github.com/kaifei-bianjie/mock/util/constants"
+	"github.com/kaifei-bianjie/mock/util/helper/account"
 	"log"
 	"time"
 )
@@ -60,8 +61,13 @@ func BatchGenSignedTxData(num int, subFaucets []conf.SubFaucet) []string {
 }
 
 func SingleBatchGenSignedTxData(num int, faucet string, password string, home string, faucetAddr string) []string {
-	resChan := make(chan types.GenSignedTxDataRes, 10000)
-
+	resChan := make(chan types.GenSignedTxDataRes, 100000)
+	faucetAddr, err := account.GetAccAddr(faucet, home)
+	if err != nil {
+		log.Printf("%v: cannot get %v address fail: %v !!!!!!!!!!!!\n",
+			"New Account", faucet, err)
+		return nil
+	}
 	senderInfos, err := key.NewAccountSingle(num, home, faucet, faucetAddr)
 	if err != nil {
 		// TODO: handle err
@@ -107,7 +113,7 @@ func SingleBatchGenSignedTxData(num int, faucet string, password string, home st
 	}
 
 	var signedTxDataReturn []string
-	for j:=0; j < lens; j++{
+	for j := 0; j < lens; j++ {
 		signedTxDataReturn = append(signedTxDataReturn, signedTxData[j])
 	}
 	return signedTxDataReturn
