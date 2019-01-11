@@ -17,6 +17,7 @@ const (
 	UriTransfer      = "/bank/accounts/%s/transfers" // format is /bank/accounts/{address}/transfers
 	UriTxSign        = "/tx/sign"
 	UriTxBroadcastTx = "/txs/send"
+	UriTxBroadcast   = "/tx/broadcast"
 
 	// http status code
 	StatusCodeOk       = 200
@@ -37,4 +38,6 @@ const (
 	MockDefaultGas     = "20000"
 	MockDefaultFee     = "0.01iris"
 	Denom              = "iris"
+	FeeAtto			   = ""
+	transferAmountAtto = ""
 )

@@ -14,6 +14,8 @@ func main() {
 		cmd.GenSignedTxDataCmd(),
 		cmd.SingleAccGenSignedTxDataCmd(),
 		cmd.MultiAccGenSignedTxDataCmd(),
+		cmd.FaucetAverDisrCmd(),
+		cmd.MultiAccSignDirectly(),
 	)
 
 	executor := prepareMainCmd(rootCmd)

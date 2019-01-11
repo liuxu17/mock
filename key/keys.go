@@ -248,7 +248,7 @@ func CreateKeyByCmd(faucetName string, sequence string, AccountNum string, keyNa
 	)
 
 	// create account
-	address, err := account.CreateAccountByCmd(keyName, constants.KeyPassword, home)
+	address, seed, err := account.CreateAccountByCmd(keyName, constants.KeyPassword, home)
 	if err != nil {
 		log.Printf("%v: create key fail: %v\n", method, err)
 		return
@@ -261,6 +261,33 @@ func CreateKeyByCmd(faucetName string, sequence string, AccountNum string, keyNa
 	accountInfo.Password = constants.KeyPassword
 	accountInfo.Sequence = sequence
 	accountInfo.AccountNumber = AccountNum
+	accountInfo.Address = address
+	accountInfo.AccountName = keyName
+	accountInfo.Seed = seed
+
+	accChan <- accountInfo
+}
+
+
+// create key and return accountInfo by channel
+func CreateKeyByCli(keyName string, accChan chan types.AccountInfo, home string) {
+	var (
+		accountInfo types.AccountInfo
+		method      = "CreateKey"
+	)
+
+	// create account
+	address, _,err := account.CreateAccountByCmd(keyName, constants.KeyPassword, home)
+	if err != nil {
+		log.Printf("%v: create key fail: %v\n", method, err)
+		return
+		//accChan <- accountInfo
+	}
+	log.Printf("%v: account which name is %v create success\n",
+		method, keyName)
+
+	accountInfo.LocalAccountName = keyName
+	accountInfo.Password = constants.KeyPassword
 	accountInfo.Address = address
 
 	accChan <- accountInfo

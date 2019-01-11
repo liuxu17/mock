@@ -60,7 +60,7 @@ func CreateAccount(name, password, seed string) (string, error) {
 }
 
 // create key
-func CreateAccountByCmd(name, password string, home string) (string, error) {
+func CreateAccountByCmd(name, password string, home string) (string, string, error) {
 	cmdStr := constants.KeysAddCmd + name + " --home=" + home
 	cmd := getCmd(cmdStr, nil)
 	//cmd = exec.Command(constants.KeysAddCmd + name + " --home=" + home)
@@ -82,7 +82,7 @@ func CreateAccountByCmd(name, password string, home string) (string, error) {
 
 	if err := cmd.Wait(); err != nil {
 		log.Printf("Command finished with error: %v, %v", err.Error(), string(errmsg))
-		return "", err
+		return "", "", err
 	}
 	msg := string(output)
 	//log.Printf("Command finished with response: %v", msg)
@@ -90,11 +90,13 @@ func CreateAccountByCmd(name, password string, home string) (string, error) {
 	if strings.Contains(msg, "It is the only way to recover your account") {
 		index := strings.Index(msg, "local") + 6
 		address := string(msg[index : index+42])
+		index = strings.Index(msg, "password.") + 11
+		seed := string(msg[index : len(msg)-1])
 		log.Printf("Successfully create account %v", name)
-		return address, nil
+		return address, seed, nil
 	}
 
-	return "", fmt.Errorf("the responseBody is wrong during the check process")
+	return "", "", fmt.Errorf("the responseBody is wrong during the check process")
 }
 
 // get account info

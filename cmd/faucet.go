@@ -105,3 +105,95 @@ mock faucet-init --faucet-name {faucet-name} --seed="recycle light kid ..." \&
 
 	return cmd
 }
+
+
+func FaucetAverDisrCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "faucet-aver",
+		Short: "create sub faucet account use faucet account",
+		Long: `
+Note the account must has many token, so that this account can transfer token to other account.
+`,
+		Example: `
+mock faucet-aver --faucet-name {faucet-name} \&
+--sub-faucet-num {sub-faucet-num} --home {config-home} \&
+--chain-id {chain-id} --node {node}
+`,
+		RunE: func(cmd *cobra.Command, _ []string) error {
+			name := viper.GetString(FlagFaucetName)
+			confHomeDir := viper.GetString(FlagConfDir)
+			subFaucetNum := viper.GetInt(FlagSubFaucetAccNum)
+			confFilePath := fmt.Sprintf("%v/%v", confHomeDir, constants.ConfigFileName)
+
+			// get flag and validate basic logic
+			var (
+				configContent    conf.ConfigContent
+				configSubFaucets []conf.SubFaucet
+			)
+
+
+			exists, err := helper.CheckFileExist(confFilePath)
+			if err != nil {
+				panic(err)
+			}
+			if exists {
+				return fmt.Errorf("config file alread exist in %v\n, "+
+					"please remove it before exec this command", confHomeDir)
+			}
+
+			err = helper.CreateFolder(confHomeDir)
+			if err != nil {
+				panic(err)
+			}
+
+
+			// create sub faucet account
+			fmt.Printf("now create %v sub faucet account\n", subFaucetNum)
+			faucetAddr, err := account.GetAccAddr(name, confHomeDir)
+			if err != nil {
+				return err
+			}
+			subAccs, err := key.CreateSubAccountByBroadCast(name, constants.MockFaucetPassword, confHomeDir, subFaucetNum, faucetAddr)
+			if err != nil {
+				return err
+			}
+
+			// write config content to file
+			for _, acc := range subAccs {
+				subFaucet := conf.SubFaucet{
+					FaucetName:     acc.LocalAccountName,
+					FaucetPassword: acc.Password,
+					FaucetAddr:     acc.Address,
+					Seed:			acc.Seed,
+				}
+
+				configSubFaucets = append(configSubFaucets, subFaucet)
+			}
+			configContent.FaucetName = name
+			configContent.FaucetAddr = faucetAddr
+			configContent.FaucetSeed = ""
+			configContent.SubFaucets = configSubFaucets
+
+			configBytes, err := json.MarshalIndent(configContent, "", "\t")
+			if err != nil {
+				return err
+			}
+
+			err = helper.WriteFile(confFilePath, configBytes)
+			if err != nil {
+				return err
+			}
+
+			fmt.Printf("success init faucet info in %v\n", confFilePath)
+			return nil
+		},
+	}
+
+	cmd.Flags().AddFlagSet(faucetAverFlagSet)
+	cmd.MarkFlagRequired(FlagFaucetName)
+	cmd.MarkFlagRequired(FlagSubFaucetAccNum)
+	cmd.MarkPersistentFlagRequired(FlagChainId)
+	cmd.MarkPersistentFlagRequired(FlagNodeUrl)
+
+	return cmd
+}

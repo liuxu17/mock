@@ -14,6 +14,7 @@ import (
 	"github.com/kaifei-bianjie/mock/util/helper"
 	"github.com/kaifei-bianjie/mock/util/helper/tx"
 	"log"
+	"strings"
 )
 
 const (
@@ -69,7 +70,7 @@ func signTx(unsignedTx types.TxDataRes, senderInfo types.AccountInfo) ([]byte, e
 
 	// send sign tx request
 	reqBytes, err := json.Marshal(signTxReq)
-	log.Printf("%s\n", reqBytes)
+	//log.Printf("%s\n", reqBytes)
 	if err != nil {
 		return nil, err
 	}
@@ -86,6 +87,63 @@ func signTx(unsignedTx types.TxDataRes, senderInfo types.AccountInfo) ([]byte, e
 	}
 
 	return resBytes, nil
+}
+
+
+func BroadcastTx(txBody string) ([]byte, error) {
+
+	reqBytes:= []byte(txBody)
+
+	reqBuffer := bytes.NewBuffer(reqBytes)
+	statusCode, resBytes, err := helper.HttpClientPostJsonData(constants.UriTxBroadcast, reqBuffer)
+
+	// handle response
+	if err != nil {
+		return nil, err
+	}
+	if statusCode != constants.StatusCodeOk {
+		return nil, fmt.Errorf("unexcepted status code: %v", statusCode)
+	}
+
+	if strings.Contains(string(resBytes), "invalid") {
+		log.Printf("%s\n", resBytes)
+		return nil, fmt.Errorf("unexcepted information: %v", "invalid")
+	}
+
+	a := strings.Contains(string(resBytes), "check_tx") && strings.Contains(string(resBytes), "deliver_tx")
+	b := strings.Contains(string(resBytes), "hash") && strings.Contains(string(resBytes), "height")
+	if a&&b {
+		return resBytes, nil
+	} else {
+		log.Printf("check_tx check broadcast information failed\n")
+		return nil, fmt.Errorf("check broadcast information failed")
+	}
+	return resBytes, nil
+}
+
+// broadcast many txs for an account, the num is test-num
+func BroadcastTxForAccount(SignedDataArray []conf.SignedData, accountIndex int, testDataChan chan types.TestPressData) (int,error) {
+	var err error
+	var counter int
+	var testData types.TestPressData
+	testData.AccountIndex = accountIndex
+	log.Printf("test account no.%d start %d txs\n", accountIndex, len(SignedDataArray[accountIndex].SignedDataArray))
+	for i := 0; i<len(SignedDataArray[accountIndex].SignedDataArray); i++ {
+		_, err = BroadcastTx(SignedDataArray[accountIndex].SignedDataArray[i])
+		// handle response
+		if err != nil {
+			log.Printf("test account no.%d succeed %d txs, sum is %d\n", accountIndex, counter, len(SignedDataArray[accountIndex].SignedDataArray))
+			testData.SuccessIndex = counter
+			testDataChan <- testData
+			return counter, err
+		} else {
+			counter = counter + 1
+		}
+	}
+	log.Printf("test account no.%d succeed %d txs, sum is %d\n", accountIndex, counter, len(SignedDataArray[accountIndex].SignedDataArray))
+	testData.SuccessIndex = counter
+	testDataChan <- testData
+	return counter, nil
 }
 
 // generate signed tx
@@ -212,7 +270,7 @@ func GenSignedTxDataFromSingleFaucet(faucetAddr string, senderInfo types.Account
 	}()
 
 	// build unsigned tx
-	unsignedTxBytes, err := tx.SendTransferTxFromFaucet(senderInfo, faucetAddr, "0.01iris", true)
+	unsignedTxBytes, err := tx.SendTransferTxFromFaucet(senderInfo, faucetAddr, "0.001iris", true)
 	if err != nil {
 		log.Printf("%v: build unsigned tx failed: %v\n", method, err)
 		return
@@ -240,38 +298,76 @@ func GenSignedTxDataFromSingleFaucet(faucetAddr string, senderInfo types.Account
 		return
 	}
 
-	// build signed data
-	/*	msgBytes, err := Cdc.MarshalJSON(signedTx.Value.Msgs[0])
-		if err != nil {
-			log.Printf("%v: build post tx data failed: %v\n", method, err)
-			return
-		}*/
-
-	/*signature := signedTx.Value.Signatures[0]
-
-	stdSign := types.StdSignature{
-		PubKey:        signature.PubKey,
-		Signature:     signature.Signature,
-		AccountNumber: signature.AccountNumber,
-		Sequence:      signature.Sequence,
+	postTx := types.TxBroadcast{
+		Tx: signedTx.Value,
 	}
 
-	postTx := types.PostTx{
-		Msgs: signedTx.Value.Msgs,
-		Fee: types.StdFee{
-			Amount: signedTx.Value.Fee.Amount,
-			Gas:    signedTx.Value.Fee.Gas,
-		},
-		Signatures: []types.StdSignature{stdSign},
-		Memo:       signedTx.Value.Memo,
-	}*/
+	postTxBytes, err := json.Marshal(postTx)
+	//log.Printf("%s\n", postTxBytes)
+	if err != nil {
+		log.Printf("%v: cdc marshal json fail: %v\n", method, err)
+		return
+	}
+
+	signedTxDataRes.Res = string(postTxBytes)
+}
+
+
+func GenSignedTxDataByAmountAndFaucet(amount string, faucetAddr string, senderInfo types.AccountInfo, receiver string, resChan chan types.GenSignedTxDataRes, chanNum int) {
+	var (
+		unsignedTx, signedTx types.TxDataRes
+		method               = "GenSignedTxData"
+	)
+	log.Printf("%v: %v goroutine begin gen signed data\n", method, chanNum)
+
+	signedTxDataRes := types.GenSignedTxDataRes{
+		ChanNum: chanNum,
+	}
+
+	defer func() {
+		if err := recover(); err != nil {
+			log.Printf("%v: failed: %v\n", method, err)
+		}
+
+		//log.Printf("%v: signed tx data: %v\n", method, signedTxDataRes.Res)
+		resChan <- signedTxDataRes
+	}()
+
+	// build unsigned tx
+	unsignedTxBytes, err := tx.SendTransferTxFromFaucet(senderInfo, faucetAddr, amount, true)
+	if err != nil {
+		log.Printf("%v: build unsigned tx failed: %v\n", method, err)
+		return
+	}
+	//log.Printf("%s\n", unsignedTxBytes)
+	err = json.Unmarshal(unsignedTxBytes, &unsignedTx)
+	//err = Cdc.UnmarshalJSON(unsignedTxBytes, &unsignedTx)
+	if err != nil {
+		log.Printf("%v: build unsigned tx failed: %v\n", method, err)
+		return
+	}
+
+	// sign tx
+	//fmt.Println(unsignedTx)
+	signedTxBytes, err := signTx(unsignedTx, senderInfo)
+	if err != nil {
+		log.Printf("%v: sign tx failed: %v\n", method, err)
+		return
+	}
+	//log.Printf("%s\n", signedTxBytes)
+
+	err = json.Unmarshal(signedTxBytes, &signedTx)
+	if err != nil {
+		log.Printf("%v: sign tx failed: %v\n", method, err)
+		return
+	}
 
 	postTx := types.TxBroadcast{
 		Tx: signedTx.Value,
 	}
 
 	postTxBytes, err := json.Marshal(postTx)
-
+	//log.Printf("%s\n", postTxBytes)
 	if err != nil {
 		log.Printf("%v: cdc marshal json fail: %v\n", method, err)
 		return
@@ -279,23 +375,5 @@ func GenSignedTxDataFromSingleFaucet(faucetAddr string, senderInfo types.Account
 
 	signedTxDataRes.Res = string(postTxBytes)
 
-	//if err != nil {
-	//	log.Printf("broadcast tx failed: %v\n", err)
-	//	return nil, err
-	//}
-	//reqBuffer := bytes.NewBuffer(reqBytes)
-	//
-	//statusCode, resBytes, err := helper.HttpClientPostJsonData(constants.UriTxBroadcastTx, reqBuffer)
-	//
-	//if err != nil {
-	//	log.Printf("broadcast tx failed: %v\n", err)
-	//	return nil, err
-	//}
-	//
-	//if statusCode != constants.StatusCodeOk {
-	//	log.Printf("broadcast tx failed, unexcepted status code: %v\n", statusCode)
-	//	return nil, err
-	//}
-	//
-	//return resBytes, nil
+
 }

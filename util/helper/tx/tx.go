@@ -15,6 +15,8 @@ func SendTransferTx(senderInfo types.AccountInfo, receiver string, amount string
 	uri := fmt.Sprintf(constants.UriTransfer, receiver)
 	if generateOnly {
 		uri = uri + "?generate-only=true"
+	} else {
+		uri = uri + "?commit=true"
 	}
 
 	if amount == "" {

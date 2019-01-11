@@ -21,7 +21,6 @@ func SingleAccGenSignedTxDataCmd() *cobra.Command {
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			// create output dir
 			outputDir := viper.GetString(FlagResOutput)
-			faucetAddr := viper.GetString(FlagFaucetAddress)
 			err := helper.CreateFolder(outputDir)
 			if err != nil {
 				return err
@@ -48,7 +47,7 @@ func SingleAccGenSignedTxDataCmd() *cobra.Command {
 
 			name := viper.GetString(FlagFaucetName)
 
-			signedTxData := service.SingleBatchGenSignedTxData(num, name, constants.KeyPassword, confHome, faucetAddr)
+			signedTxData := service.SingleBatchGenSignedTxData(num, name, constants.KeyPassword, confHome)
 
 			if len(signedTxData) > 0 {
 				// write result to file

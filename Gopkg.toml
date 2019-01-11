@@ -24,17 +24,6 @@
 #   go-tests = true
 #   unused-packages = true
 
-
-[[constraint]]
-  name = "github.com/irisnet/irishub"
-  source = "https://github.com/irisnet/irishub.git"
-  branch = "develop"
-
-[[override]]
-  name = "github.com/tendermint/tendermint"
-  source = "https://github.com/irisnet/tendermint.git"
-  version = "=v0.27.0-dev1-iris"
-
 [[constraint]]
   name = "github.com/satori/go.uuid"
   source = "https://github.com/satori/go.uuid.git"

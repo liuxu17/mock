@@ -11,6 +11,8 @@ type AccountInfo struct {
 	AccountNumber    string `json:"account_number"`
 	Sequence         string `json:"sequence"`
 	Address          string `json:"address"`
+	AccountName      string `json:"account_name"`
+	Seed             string `json:"seed"`
 }
 
 type AccountInfoRes struct {
@@ -125,4 +127,25 @@ type InOutPutData struct {
 
 type TxBroadcast struct {
 	Tx PostTx `json:"tx"`
+}
+
+type TestPressData struct {
+	AccountIndex int
+	SuccessIndex int
+}
+
+type AccountTestPrivateInfo struct {
+	PrivateKey    [32]byte
+	PubKey        []byte
+	Addr          string
+	AccountNumber uint64
+	Sequence      uint64
+}
+
+type MsgToSign struct {
+	PrivateKey    [32]byte
+	PubKey        []byte
+	Addr          string
+	AccountNumber uint64
+	Sequence      uint64
 }
