@@ -63,14 +63,14 @@ func MultiAccGenSignedTxDataCmd() *cobra.Command {
 
 			var (
 				signedDataArray []conf.SignedData
-				signedData 		conf.SignedData
+				signedData      conf.SignedData
 			)
 			for i := 0; i < testAccNum; i++ {
 				signedData = conf.SignedData{
 					SignedDataArray: service.MultiBatchGenSignedTxData(everySignedTxNum, subFaucets[i].FaucetName, subFaucets[i].FaucetAddr, confHome, subFaucets),
 				}
 				signedDataArray = append(signedDataArray, signedData)
-				log.Printf("the no.%d account signed data end\n",i)
+				log.Printf("the no.%d account signed data end\n", i)
 			}
 
 			//set pressure test log to microsecond
@@ -128,8 +128,6 @@ func MultiAccGenSignedTxDataCmd() *cobra.Command {
 	return cmd
 }
 
-
-
 func MultiAccSignDirectly() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "gen-multi-signed-tx-directly",
@@ -157,8 +155,8 @@ func MultiAccSignDirectly() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			if len(subFaucets) <= 0 {
-				return fmt.Errorf("can't read sub_faucets config")
+			if len(subFaucets) <= 0 || len(subFaucets) < testAccNum {
+				return fmt.Errorf("can't read sub_faucets config   or   the sub faucet is few")
 			}
 			err = helper.CreateFolder(outputDir)
 			if err != nil {
@@ -176,14 +174,15 @@ func MultiAccSignDirectly() *cobra.Command {
 
 			var (
 				signedDataArray []conf.SignedData
-				signedData 		conf.SignedData
+				signedData      conf.SignedData
 			)
 
-
+			log.SetFlags(log.Ldate | log.Lmicroseconds)
+			log.Printf("Pressure Test Prepare sign process start\n")
 			for i := 0; i < testAccNum; i++ {
-				log.Printf("the no.%d account begin signed data\n",i)
+				log.Printf("the no.%d account begin signed data\n", i)
 				accountPriv, err := sign.InitAccountSignProcess(subFaucets[i].FaucetAddr, subFaucets[i].Seed)
-				signedDataString, err := sign.GenSignTxByTend(everySignedTxNum, conf.ChainId, subFaucets, accountPriv)
+				signedDataString, err := sign.GenSignTxByTend(everySignedTxNum, i, conf.ChainId, subFaucets, accountPriv)
 				if err != nil {
 					return err
 				}
@@ -191,15 +190,15 @@ func MultiAccSignDirectly() *cobra.Command {
 					SignedDataArray: signedDataString,
 				}
 				signedDataArray = append(signedDataArray, signedData)
-				log.Printf("the no.%d account signed data end\n",i)
+				log.Printf("the no.%d account signed data end\n", i)
 			}
 
 			//set pressure test log to microsecond
-			log.SetFlags(log.Ldate | log.Lmicroseconds)
+
 			log.Printf("Pressure Test Start !!!!!!!!!!!\n")
 			counterChan := make(chan types.TestPressData, 100000)
 			for i := 0; i < testAccNum; i++ {
-				go sign.BroadcastTxForAccount(signedDataArray, i, counterChan)
+				sign.BroadcastTxForAccountByTime(signedDataArray, i, counterChan)
 			}
 
 			counter := 0

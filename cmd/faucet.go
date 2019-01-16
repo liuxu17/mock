@@ -106,7 +106,6 @@ mock faucet-init --faucet-name {faucet-name} --seed="recycle light kid ..." \&
 	return cmd
 }
 
-
 func FaucetAverDisrCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "faucet-aver",
@@ -131,7 +130,6 @@ mock faucet-aver --faucet-name {faucet-name} \&
 				configSubFaucets []conf.SubFaucet
 			)
 
-
 			exists, err := helper.CheckFileExist(confFilePath)
 			if err != nil {
 				panic(err)
@@ -145,7 +143,6 @@ mock faucet-aver --faucet-name {faucet-name} \&
 			if err != nil {
 				panic(err)
 			}
-
 
 			// create sub faucet account
 			fmt.Printf("now create %v sub faucet account\n", subFaucetNum)
@@ -164,7 +161,7 @@ mock faucet-aver --faucet-name {faucet-name} \&
 					FaucetName:     acc.LocalAccountName,
 					FaucetPassword: acc.Password,
 					FaucetAddr:     acc.Address,
-					Seed:			acc.Seed,
+					Seed:           acc.Seed,
 				}
 
 				configSubFaucets = append(configSubFaucets, subFaucet)

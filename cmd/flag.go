@@ -22,17 +22,24 @@ const (
 	FlagResOutput     = "output"
 
 	FlagEveryNumSignedTx = "trans-num"
+	FlagTps              = "tps"
+	FlagCommit           = "commit"
+	FlagDuration         = "duration"
+	FlagBotsNum          = "bots"
 	FlagTestAccountNum   = "acc-num"
+	FlagAccountIndex     = "account-index"
 )
 
 var (
-	rootFlagSet            = pflag.NewFlagSet("", pflag.ContinueOnError)
-	faucetFlagSet          = pflag.NewFlagSet("", pflag.ContinueOnError)
-	txFlagSet              = pflag.NewFlagSet("", pflag.ContinueOnError)
-	singleTxFlagSet        = pflag.NewFlagSet("", pflag.ContinueOnError)
-	multiTxFlagSet         = pflag.NewFlagSet("", pflag.ContinueOnError)
-	faucetAverFlagSet      = pflag.NewFlagSet("", pflag.ContinueOnError)
-	multiTxDirectlyFlagSet = pflag.NewFlagSet("", pflag.ContinueOnError)
+	rootFlagSet              = pflag.NewFlagSet("", pflag.ContinueOnError)
+	faucetFlagSet            = pflag.NewFlagSet("", pflag.ContinueOnError)
+	txFlagSet                = pflag.NewFlagSet("", pflag.ContinueOnError)
+	singleTxFlagSet          = pflag.NewFlagSet("", pflag.ContinueOnError)
+	multiTxFlagSet           = pflag.NewFlagSet("", pflag.ContinueOnError)
+	faucetAverFlagSet        = pflag.NewFlagSet("", pflag.ContinueOnError)
+	multiTxDirectlyFlagSet   = pflag.NewFlagSet("", pflag.ContinueOnError)
+	singleSignAndSaveFlagSet = pflag.NewFlagSet("", pflag.ContinueOnError)
+	broadcastFlagSet         = pflag.NewFlagSet("", pflag.ContinueOnError)
 )
 
 func init() {
@@ -74,4 +81,17 @@ func init() {
 	multiTxDirectlyFlagSet.String(FlagResOutput, os.ExpandEnv("$HOME")+"/output", "output directory of result file which content signed tx data")
 	multiTxDirectlyFlagSet.String(FlagConfDir, conf.DefaultHome, "directory of config file")
 	multiTxDirectlyFlagSet.String(FlagFaucetAddress, "", "faucet address")
+
+	singleSignAndSaveFlagSet.Int(FlagBotsNum, 0, "num of test account which will be generated")
+	singleSignAndSaveFlagSet.Int(FlagDuration, 0, "time duration during the pressure test")
+	singleSignAndSaveFlagSet.String(FlagResOutput, os.ExpandEnv("$HOME")+"/output", "output directory of result file which content signed tx data")
+	singleSignAndSaveFlagSet.String(FlagConfDir, conf.DefaultHome, "directory of config file")
+	singleSignAndSaveFlagSet.Int(FlagAccountIndex, 0, "test account index in distribute systems")
+	singleSignAndSaveFlagSet.Int(FlagTps, 0, "max tps per second")
+
+	broadcastFlagSet.Int(FlagBotsNum, 0, "num of test account which will be generated")
+	broadcastFlagSet.Int(FlagTps, 0, "max tps per second")
+	broadcastFlagSet.Int(FlagCommit, 0, "block commit time in config")
+	broadcastFlagSet.String(FlagResOutput, os.ExpandEnv("$HOME")+"/output", "output directory of result file which content signed tx data")
+
 }

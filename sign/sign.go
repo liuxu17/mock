@@ -15,6 +15,7 @@ import (
 	"github.com/kaifei-bianjie/mock/util/helper/tx"
 	"log"
 	"strings"
+	"time"
 )
 
 const (
@@ -89,13 +90,13 @@ func signTx(unsignedTx types.TxDataRes, senderInfo types.AccountInfo) ([]byte, e
 	return resBytes, nil
 }
 
-
 func BroadcastTx(txBody string) ([]byte, error) {
 
-	reqBytes:= []byte(txBody)
+	reqBytes := []byte(txBody)
 
 	reqBuffer := bytes.NewBuffer(reqBytes)
-	statusCode, resBytes, err := helper.HttpClientPostJsonData(constants.UriTxBroadcast, reqBuffer)
+	uri := constants.UriTxBroadcast + "?async=true"
+	statusCode, resBytes, err := helper.HttpClientPostJsonData(uri, reqBuffer)
 
 	// handle response
 	if err != nil {
@@ -112,7 +113,7 @@ func BroadcastTx(txBody string) ([]byte, error) {
 
 	a := strings.Contains(string(resBytes), "check_tx") && strings.Contains(string(resBytes), "deliver_tx")
 	b := strings.Contains(string(resBytes), "hash") && strings.Contains(string(resBytes), "height")
-	if a&&b {
+	if a && b {
 		return resBytes, nil
 	} else {
 		log.Printf("check_tx check broadcast information failed\n")
@@ -122,22 +123,58 @@ func BroadcastTx(txBody string) ([]byte, error) {
 }
 
 // broadcast many txs for an account, the num is test-num
-func BroadcastTxForAccount(SignedDataArray []conf.SignedData, accountIndex int, testDataChan chan types.TestPressData) (int,error) {
+func BroadcastTxForAccount(SignedDataArray []conf.SignedData, accountIndex int, testDataChan chan types.TestPressData) (int, error) {
 	var err error
 	var counter int
 	var testData types.TestPressData
 	testData.AccountIndex = accountIndex
 	log.Printf("test account no.%d start %d txs\n", accountIndex, len(SignedDataArray[accountIndex].SignedDataArray))
-	for i := 0; i<len(SignedDataArray[accountIndex].SignedDataArray); i++ {
+	for i := 0; i < len(SignedDataArray[accountIndex].SignedDataArray); i++ {
 		_, err = BroadcastTx(SignedDataArray[accountIndex].SignedDataArray[i])
 		// handle response
 		if err != nil {
+			log.Printf(err.Error())
 			log.Printf("test account no.%d succeed %d txs, sum is %d\n", accountIndex, counter, len(SignedDataArray[accountIndex].SignedDataArray))
 			testData.SuccessIndex = counter
 			testDataChan <- testData
 			return counter, err
 		} else {
 			counter = counter + 1
+		}
+	}
+	log.Printf("test account no.%d succeed %d txs, sum is %d\n", accountIndex, counter, len(SignedDataArray[accountIndex].SignedDataArray))
+	testData.SuccessIndex = counter
+	testDataChan <- testData
+	return counter, nil
+}
+
+// broadcast many txs for an account, the num is test-num
+func BroadcastTxForAccountByTime(SignedDataArray []conf.SignedData, accountIndex int, testDataChan chan types.TestPressData) (int, error) {
+	var err error
+	var counter int
+	var testData types.TestPressData
+	testData.AccountIndex = accountIndex
+	log.Printf("test account no.%d start %d txs\n", accountIndex, len(SignedDataArray[accountIndex].SignedDataArray))
+	timeTemp := time.Now()
+	for i := 0; i < len(SignedDataArray[accountIndex].SignedDataArray); i++ {
+		_, err = BroadcastTx(SignedDataArray[accountIndex].SignedDataArray[i])
+		// handle response
+		if err != nil {
+			log.Printf(err.Error())
+			log.Printf("test account no.%d succeed %d txs, sum is %d\n", accountIndex, counter, len(SignedDataArray[accountIndex].SignedDataArray))
+			testData.SuccessIndex = counter
+			testDataChan <- testData
+			return counter, err
+		} else {
+			counter = counter + 1
+		}
+
+		if i%2500 == 0 {
+			if timeTemp.Add(time.Second * 5).After(time.Now()) {
+				time.Sleep(timeTemp.Add(time.Second * 5).Sub(time.Now()))
+				log.Printf("test broadcast %d\n", i)
+			}
+			timeTemp = time.Now()
 		}
 	}
 	log.Printf("test account no.%d succeed %d txs, sum is %d\n", accountIndex, counter, len(SignedDataArray[accountIndex].SignedDataArray))
@@ -312,7 +349,6 @@ func GenSignedTxDataFromSingleFaucet(faucetAddr string, senderInfo types.Account
 	signedTxDataRes.Res = string(postTxBytes)
 }
 
-
 func GenSignedTxDataByAmountAndFaucet(amount string, faucetAddr string, senderInfo types.AccountInfo, receiver string, resChan chan types.GenSignedTxDataRes, chanNum int) {
 	var (
 		unsignedTx, signedTx types.TxDataRes
@@ -374,6 +410,5 @@ func GenSignedTxDataByAmountAndFaucet(amount string, faucetAddr string, senderIn
 	}
 
 	signedTxDataRes.Res = string(postTxBytes)
-
 
 }

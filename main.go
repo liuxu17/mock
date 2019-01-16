@@ -16,6 +16,8 @@ func main() {
 		cmd.MultiAccGenSignedTxDataCmd(),
 		cmd.FaucetAverDisrCmd(),
 		cmd.MultiAccSignDirectly(),
+		cmd.SingleAccSignAndSave(),
+		cmd.BroadCastFromSingleFile(),
 	)
 
 	executor := prepareMainCmd(rootCmd)

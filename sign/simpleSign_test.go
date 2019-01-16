@@ -9,7 +9,7 @@ import (
 	"testing"
 )
 
-func TestSign(t *testing.T){
+func TestSign(t *testing.T) {
 	mnemonic := "tube lonely pause spring gym veteran know want grid tired taxi such same mesh charge orient bracket ozone concert once good quick dry boss"
 	seed, err := bip39.NewSeedWithErrorChecking(mnemonic, "")
 	if err != nil {

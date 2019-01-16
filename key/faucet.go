@@ -165,7 +165,7 @@ func CreateSubAccount(faucetName, faucetPasswd, confHome string, subAccNum int, 
 
 func CreateSubAccountByBroadCast(faucetName, faucetPasswd, confHome string, subAccNum int, faucetAddr string) ([]types.AccountInfo, error) {
 	var (
-		method               = "CreateFaucetSubAccount"
+		method  = "CreateFaucetSubAccount"
 		subAccs []types.AccountInfo
 	)
 	resChan := make(chan types.GenSignedTxDataRes, 100000)
@@ -247,7 +247,7 @@ func CreateSubAccountByBroadCast(faucetName, faucetPasswd, confHome string, subA
 	}
 
 	var counter int
-	for i := 0; i<len(signedTxDataReturn); i++ {
+	for i := 0; i < len(signedTxDataReturn); i++ {
 		_, err = sign.BroadcastTx(signedTxDataReturn[i])
 		// handle response
 		if err != nil {

@@ -73,7 +73,7 @@ func InitAccountSignProcess(fromAddr string, mnemonic string) (types.AccountTest
 	return Account, err
 }
 
-func GenSignTxByTend(testNum int, chainId string, subFaucets []SubFaucet, accountPrivate types.AccountTestPrivateInfo) ([]string, error) {
+func GenSignTxByTend(testNum int, fromIndex int, chainId string, subFaucets []SubFaucet, accountPrivate types.AccountTestPrivateInfo) ([]string, error) {
 
 	cdc := codec.New()
 	auth.RegisterCodec(cdc)
@@ -86,7 +86,7 @@ func GenSignTxByTend(testNum int, chainId string, subFaucets []SubFaucet, accoun
 	cdc.RegisterInterface((*sdk.Msg)(nil), nil)
 	cdc.RegisterInterface((*sdk.Tx)(nil), nil)
 
-	from, err := sdk.AccAddressFromBech32(subFaucets[testNum].FaucetAddr)
+	from, err := sdk.AccAddressFromBech32(subFaucets[fromIndex].FaucetAddr)
 
 	if err != nil {
 		return nil, errors.New("err in address to String")
@@ -95,7 +95,6 @@ func GenSignTxByTend(testNum int, chainId string, subFaucets []SubFaucet, accoun
 	coins := sdk.Coins{{Denom: denom, Amount: amount}}
 
 	input := bank.Input{Address: from, Coins: coins}
-
 
 	feea, ok := sdk.NewIntFromString(feeAmtV)
 	feeAmt := sdk.Coins{{Denom: denom, Amount: feea}}
@@ -106,18 +105,11 @@ func GenSignTxByTend(testNum int, chainId string, subFaucets []SubFaucet, accoun
 
 	fee := auth.StdFee{Amount: feeAmt, Gas: gas}
 
-	sigMsg := StdSignMsg{
-		ChainID:       chainId,
-		AccountNumber: accountPrivate.AccountNumber,
-		Sequence:      accountPrivate.Sequence,
-		Memo:          "",
-		Msgs:          msgs,
-		Fee:           fee,
-	}
 	var signedData []string
 	priv := secp256k1.PrivKeySecp256k1(accountPrivate.PrivateKey)
 	sigChan := make(chan auth.StdTx, 30)
 	counter := 0
+	sequence := accountPrivate.Sequence
 	for i := 0; i < testNum; i++ {
 		to, err := sdk.AccAddressFromBech32(subFaucets[counter].FaucetAddr)
 		if err != nil {
@@ -129,8 +121,16 @@ func GenSignTxByTend(testNum int, chainId string, subFaucets []SubFaucet, accoun
 			Outputs: []bank.Output{output},
 		}}
 
+		sigMsg := StdSignMsg{
+			ChainID:       chainId,
+			AccountNumber: accountPrivate.AccountNumber,
+			Sequence:      sequence,
+			Memo:          "",
+			Msgs:          msgs,
+			Fee:           fee,
+		}
 		go genSignedDataByTend(priv, sigMsg, accountPrivate, sigChan, msgs, fee)
-		tx := <- sigChan
+		tx := <-sigChan
 		bz, _ := cdc.MarshalJSON(tx)
 		var signedTx types.TxDataRes
 		err = json.Unmarshal(bz, &signedTx)
@@ -150,7 +150,7 @@ func GenSignTxByTend(testNum int, chainId string, subFaucets []SubFaucet, accoun
 			return nil, err
 		}
 		signedData = append(signedData, string(postTxBytes))
-		sigMsg.Sequence = sigMsg.Sequence + 1
+		sequence = sequence + 1
 		counter = counter + 1
 		if counter == len(subFaucets) {
 			counter = 0
@@ -159,7 +159,7 @@ func GenSignTxByTend(testNum int, chainId string, subFaucets []SubFaucet, accoun
 	return signedData, nil
 }
 
-func genSignedDataByTend(priv secp256k1.PrivKeySecp256k1, sigMsg StdSignMsg, accountPrivate types.AccountTestPrivateInfo, sigChan chan auth.StdTx, msgs []sdk.Msg, fee auth.StdFee){
+func genSignedDataByTend(priv secp256k1.PrivKeySecp256k1, sigMsg StdSignMsg, accountPrivate types.AccountTestPrivateInfo, sigChan chan auth.StdTx, msgs []sdk.Msg, fee auth.StdFee) {
 	sigBz := sigMsg.Bytes()
 	sigByte, err := priv.Sign(sigBz)
 	if err != nil {

@@ -156,7 +156,7 @@ func MultiBatchGenSignedTxData(num int, faucet string, faucetAddr string, home s
 		createKeyChan <- accountInfo
 		sequence = sequence + 1
 
-		if counter == faucetCapacity - 1 {
+		if counter == faucetCapacity-1 {
 			counter = 0
 		}
 		counter = counter + 1
@@ -225,7 +225,6 @@ func MultiBatchGenSignedTxData(num int, faucet string, faucetAddr string, home s
 	return signedTxDataReturn
 }
 
-
 func CreateSubAccountFromFaucet(amount string, num int, faucet string, faucetAddr string, home string, subFaucet []conf.SubFaucet) []string {
 	resChan := make(chan types.GenSignedTxDataRes, 100000)
 	faucetAddr, err := account.GetAccAddr(faucet, home)
@@ -241,7 +240,7 @@ func CreateSubAccountFromFaucet(amount string, num int, faucet string, faucetAdd
 
 	lens := len(senderInfos)
 	var (
-		method= "BatchGenSignedTx"
+		method       = "BatchGenSignedTx"
 		signedTxData [100000]string
 	)
 	if lens > 0 {

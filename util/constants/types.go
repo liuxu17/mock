@@ -38,6 +38,6 @@ const (
 	MockDefaultGas     = "20000"
 	MockDefaultFee     = "0.01iris"
 	Denom              = "iris"
-	FeeAtto			   = ""
+	FeeAtto            = ""
 	transferAmountAtto = ""
 )

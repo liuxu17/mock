@@ -32,4 +32,5 @@ type SubFaucet struct {
 
 type SignedData struct {
 	SignedDataArray []string
+	Counter         int
 }
