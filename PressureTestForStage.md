@@ -10,7 +10,7 @@
 **Command**
 
 ```bash
-mock gen-signed-tx-separately --chain-id shilei-qa --home /Users/zjb/.iriscli/ --tps=200 --duration=10 --bots=4 --account-index=0
+mock gen-signed-tx-separately --chain-id shilei-qa --home /Users/zjb/.iriscli/ --tps 200 --duration 10 --bots 4 --account-index 0
 
 ```
 
@@ -30,10 +30,9 @@ mock gen-signed-tx-separately --chain-id shilei-qa --home /Users/zjb/.iriscli/ -
 **Command**
 
 ```bash
-mock broadcast-signed-tx-separately --output {output-dir} --node {node-url} \&
---tps={max broadcast speed} --duration={duration} --bots={num of test node} --commit={block commit time in config}
+mock broadcast-signed-tx-separately --output {output-dir} --node {node-url} --tps={max broadcast speed} --duration={duration} --bots={num of test node} --commit={block commit time in config}
 
-mock broadcast-signed-tx-separately --output /Users/zjb/output/res_signed_tx_1547620358 --node http://localhost:1317 --tps=200 --bots=4 --commit=5
+mock broadcast-signed-tx-separately --output /Users/zjb/output/res_signed_tx_1547620358 --node http://localhost:1317 --tps 200 --bots 4 --commit 5
 ```
 
 **Parameters**
