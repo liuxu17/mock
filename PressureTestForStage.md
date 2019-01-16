@@ -38,8 +38,8 @@ mock broadcast-signed-tx-separately --output /Users/zjb/output/res_signed_tx_154
 **Parameters**
 
 - `output`：测试数据的文件路径
-- `chain-id`：chain id
 - `node`：lcd ip port addr
 - `tps`：整理的目标tps
 - `duration`：测试时间（单位 min） 一开始可以先短一点 比如10min
-- `bots`：使用本软件的本次测试的节点数
+- `bots`：使用本软件的本次测试的节点数 一般为 4个 或 5个
+- `commit`：是指区块的期望打包时间 一般为5s
