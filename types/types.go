@@ -53,6 +53,7 @@ type KeyCreateReq struct {
 
 type KeyCreateRes struct {
 	Address string `json:"address"`
+	Seed    string `json:"seed"`
 }
 
 type SignTxReq struct {

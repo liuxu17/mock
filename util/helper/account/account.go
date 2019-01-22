@@ -60,6 +60,46 @@ func CreateAccount(name, password, seed string) (string, error) {
 }
 
 // create key
+func CreateAccountByLCD(name, password string) (string, string, error) {
+	req := types.KeyCreateReq{
+		Name:     name,
+		Password: password,
+		Seed: "",
+	}
+
+	uri := constants.UriKeyCreate
+
+	reqBytes, err := json.Marshal(req)
+	if err != nil {
+		return "", "", err
+	}
+
+	reqBody := bytes.NewBuffer(reqBytes)
+
+	statusCode, resBytes, err := helper.HttpClientPostJsonData(uri, reqBody)
+
+	if err != nil {
+		return "", "", err
+	}
+
+	if statusCode == constants.StatusCodeOk {
+		res := types.KeyCreateRes{}
+		if err := json.Unmarshal(resBytes, &res); err != nil {
+			return "", "", nil
+		}
+		return res.Address, res.Seed, nil
+	} else if statusCode == constants.StatusCodeConflict {
+		return "", "", fmt.Errorf("%v", string(resBytes))
+	} else {
+		errRes := types.ErrorRes{}
+		if err := json.Unmarshal(resBytes, &errRes); err != nil {
+			return "", "", err
+		}
+		return "", "", fmt.Errorf("err code: %v, err msg: %v", errRes.Code, errRes.ErrorMessage)
+	}
+}
+
+// create key
 func CreateAccountByCmd(name, password string, home string) (string, string, error) {
 	cmdStr := constants.KeysAddCmd + name + " --home=" + home
 	cmd := getCmd(cmdStr, nil)
@@ -169,6 +209,28 @@ func GetAccAddr(name string, home string) (string, error) {
 		} else {
 			return accountInfo, fmt.Errorf("status code is not ok, code: %v", statusCode)
 		}*/
+}
+
+// get account address by name
+func GetAccAddrByLCD(name string) (string, error) {
+	var (
+			accountInfo types.KeyInfo
+		)
+		uri := fmt.Sprintf(constants.UriKeyInfo, name)
+		statusCode, resByte, err := helper.HttpClientGetData(uri)
+
+		if err != nil {
+			return "", err
+		}
+
+		if statusCode == constants.StatusCodeOk {
+			if err := json.Unmarshal(resByte, &accountInfo); err != nil {
+				return "", err
+			}
+			return accountInfo.Address, nil
+		} else {
+			return "", fmt.Errorf("status code is not ok, code: %v", statusCode)
+		}
 }
 
 func getCmd(command string, escapeParams []string) *exec.Cmd {

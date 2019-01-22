@@ -146,7 +146,7 @@ mock faucet-aver --faucet-name {faucet-name} \&
 
 			// create sub faucet account
 			fmt.Printf("now create %v sub faucet account\n", subFaucetNum)
-			faucetAddr, err := account.GetAccAddr(name, confHomeDir)
+			faucetAddr, err := account.GetAccAddrByLCD(name)
 			if err != nil {
 				return err
 			}

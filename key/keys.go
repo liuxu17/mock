@@ -41,7 +41,7 @@ func NewAccountSingle(num int, home string, faucet string, faucetAddr string) ([
 
 	for i := 1; i <= num; i++ {
 		keyName := account.GenKeyName(constants.KeyNamePrefix, i)
-		CreateKeyByCmd(faucet, strconv.Itoa(sequence), acc.AccountNumber, keyName, createKeyChan, home)
+		CreateKeyByLCD(faucet, strconv.Itoa(sequence), acc.AccountNumber, keyName, createKeyChan, home)
 		sequence = sequence + 1
 		//go CreateKey(keyName, createKeyChan)
 	}
@@ -249,6 +249,34 @@ func CreateKeyByCmd(faucetName string, sequence string, AccountNum string, keyNa
 
 	// create account
 	address, seed, err := account.CreateAccountByCmd(keyName, constants.KeyPassword, home)
+	if err != nil {
+		log.Printf("%v: create key fail: %v\n", method, err)
+		return
+		//accChan <- accountInfo
+	}
+	log.Printf("%v: account which name is %v create success\n",
+		method, keyName)
+
+	accountInfo.LocalAccountName = faucetName
+	accountInfo.Password = constants.KeyPassword
+	accountInfo.Sequence = sequence
+	accountInfo.AccountNumber = AccountNum
+	accountInfo.Address = address
+	accountInfo.AccountName = keyName
+	accountInfo.Seed = seed
+
+	accChan <- accountInfo
+}
+
+// create key and return accountInfo by LCD and channel
+func CreateKeyByLCD(faucetName string, sequence string, AccountNum string, keyName string, accChan chan types.AccountInfo, home string) {
+	var (
+		accountInfo types.AccountInfo
+		method      = "CreateKey"
+	)
+
+	// create account
+	address, seed, err := account.CreateAccountByLCD(keyName, constants.KeyPassword)
 	if err != nil {
 		log.Printf("%v: create key fail: %v\n", method, err)
 		return
