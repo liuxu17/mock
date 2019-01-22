@@ -34,7 +34,7 @@ func (msg StdSignMsg) Bytes() []byte {
 
 const (
 	amtV    = "1000000000000000"
-	feeAmtV = "10000000000000000"
+	feeAmtV = "5000000000000000000"
 	denom   = "iris-atto"
 	gas     = uint64(20000)
 	memo    = ""

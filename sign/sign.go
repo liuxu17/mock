@@ -162,9 +162,14 @@ func BroadcastTxForAccountByTime(SignedDataArray []conf.SignedData, accountIndex
 		if err != nil {
 			log.Printf(err.Error())
 			log.Printf("test account no.%d succeed %d txs, sum is %d\n", accountIndex, counter, len(SignedDataArray[accountIndex].SignedDataArray))
-			testData.SuccessIndex = counter
-			testDataChan <- testData
-			return counter, err
+			for {
+				time.Sleep(time.Millisecond * 3)
+				_, err = BroadcastTx(SignedDataArray[accountIndex].SignedDataArray[i])
+				if err == nil {
+					counter = counter + 1
+					break
+				}
+			}
 		} else {
 			counter = counter + 1
 		}
@@ -172,8 +177,8 @@ func BroadcastTxForAccountByTime(SignedDataArray []conf.SignedData, accountIndex
 		if i%2500 == 0 {
 			if timeTemp.Add(time.Second * 5).After(time.Now()) {
 				time.Sleep(timeTemp.Add(time.Second * 5).Sub(time.Now()))
-				log.Printf("test broadcast %d\n", i)
 			}
+			log.Printf("test broadcast %d\n", i)
 			timeTemp = time.Now()
 		}
 	}

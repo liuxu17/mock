@@ -12,12 +12,12 @@ func main() {
 	rootCmd.AddCommand(
 		cmd.FaucetInitCmd(),
 		cmd.GenSignedTxDataCmd(),
-		cmd.SingleAccGenSignedTxDataCmd(),
-		cmd.MultiAccGenSignedTxDataCmd(),
-		cmd.FaucetAverDisrCmd(),
-		cmd.MultiAccSignDirectly(),
-		cmd.SingleAccSignAndSave(),
-		cmd.BroadCastFromSingleFile(),
+		cmd.SingleAccGenSignedTxDataCmd(), //single account generates signed data by lcd sign
+		cmd.MultiAccGenSignedTxDataCmd(), //many accounts generate tx signed data by lcd sign
+		cmd.FaucetAverDisrCmd(), //create many keys and let a faucet account transfer an average amount to every new key address
+		cmd.MultiAccSignDirectly(), //many accounts tx data signed by tendermint will be broadcasted by lcd
+		cmd.SingleAccSignAndSave(), //special for stage, generate signed data for an amount and save data to a file named by timestamp
+		cmd.BroadcastFromSingleFile(), //special for stage, broadcast the test data in a single file in order
 	)
 
 	executor := prepareMainCmd(rootCmd)

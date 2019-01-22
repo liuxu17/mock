@@ -130,7 +130,7 @@ func SingleAccSignAndSave() *cobra.Command {
 	return cmd
 }
 
-func BroadCastFromSingleFile() *cobra.Command {
+func BroadcastFromSingleFile() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "broadcast-signed-tx-separately",
 		Short: "broadcast signed tx data",
@@ -163,11 +163,20 @@ func BroadCastFromSingleFile() *cobra.Command {
 			for sc.Scan() {
 				count++
 				_, err = sign.BroadcastTx(sc.Text())
+				if err != nil  {
+					for {
+						time.Sleep(time.Millisecond * 3)
+						_, err = sign.BroadcastTx(sc.Text())
+						if err == nil {
+							break
+						}
+					}
+				}
 				if count % realDuration == 0 {
 					if timeTemp.Add(time.Second * time.Duration(commitDuration)).After(time.Now()) {
 						time.Sleep(timeTemp.Add(time.Second * time.Duration(commitDuration)).Sub(time.Now()))
-						log.Printf("test broadcast %d\n", count)
 					}
+					log.Printf("test broadcast %d\n", count)
 					timeTemp = time.Now()
 				}
 			}

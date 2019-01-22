@@ -36,7 +36,7 @@ const (
 	MockFaucetPassword = "1234567890"
 	MockTransferAmount = "0.03iris"
 	MockDefaultGas     = "20000"
-	MockDefaultFee     = "0.01iris"
+	MockDefaultFee     = "5iris"
 	Denom              = "iris"
 	FeeAtto            = ""
 	transferAmountAtto = ""
